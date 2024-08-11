@@ -1,0 +1,27 @@
+--cpu Cortex-M3
+"32basic\startup_stm32f103xb.o"
+"32basic\basic.o"
+"32basic\main.o"
+"32basic\gpio.o"
+"32basic\usart.o"
+"32basic\stm32f1xx_it.o"
+"32basic\stm32f1xx_hal_msp.o"
+"32basic\stm32f1xx_hal_gpio_ex.o"
+"32basic\stm32f1xx_hal_tim.o"
+"32basic\stm32f1xx_hal_tim_ex.o"
+"32basic\stm32f1xx_hal_uart.o"
+"32basic\stm32f1xx_hal.o"
+"32basic\stm32f1xx_hal_rcc.o"
+"32basic\stm32f1xx_hal_rcc_ex.o"
+"32basic\stm32f1xx_hal_gpio.o"
+"32basic\stm32f1xx_hal_dma.o"
+"32basic\stm32f1xx_hal_cortex.o"
+"32basic\stm32f1xx_hal_pwr.o"
+"32basic\stm32f1xx_hal_flash.o"
+"32basic\stm32f1xx_hal_flash_ex.o"
+"32basic\stm32f1xx_hal_exti.o"
+"32basic\system_stm32f1xx.o"
+--library_type=microlib --strict --scatter "32BASIC\32BASIC.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "32BASIC.map" -o 32BASIC\32BASIC.axf

@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1723118871 source:d:\pjbasic\pjbasic\pj_basic\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"BASIC.h"
+
+1723112761 d:\pjbasic\pjbasic\pj_basic\basic.h
+
+1723112775 source:d:\pjbasic\pjbasic\pj_basic\basic.c
+	<stdlib.h>
+	<stdio.h>
+	<string.h>
+	"BASIC.h"
+
+1722591859 source:d:\pjbasic\pjbasic\pj_basic\basic.h
+
