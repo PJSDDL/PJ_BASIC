@@ -1,0 +1,5 @@
+".\Objects\STARTUP.obj",
+".\Objects\BASIC.obj",
+".\Objects\main.obj" 
+TO ".\Objects\PJ_BASIC" 
+PRINT(".\Listings\PJ_BASIC.m51") RAMSIZE(256) 

@@ -1,0 +1,1468 @@
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 1   
+
+
+C51 COMPILER V7.06, COMPILATION OF MODULE BASIC
+OBJECT MODULE PLACED IN .\Objects\BASIC.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE BASIC.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -BASIC.lst) OBJECT(.\Objects\BASIC.obj)
+
+stmt level    source
+
+   1          #include <stdlib.h>
+   2          #include <stdio.h>
+   3          #include <string.h>
+   4          #include "BASIC.h"
+   5          
+   6          void list_init(LIST *lists)
+   7          {
+   8   1          lists->index = 0;
+   9   1          lists->MAX_LEN = LIST_LEN;
+  10   1      }
+  11          
+  12          //向列表第一列末尾添加a，向第二列末尾添加b
+  13          void list_append(LIST *lists, u32 a, u32 b)
+  14          {
+  15   1          lists->list[lists->index][0] = a;
+  16   1          lists->list[lists->index][1] = b;
+  17   1          lists->index++;
+  18   1      
+  19   1          if (lists->index >= lists->MAX_LEN)
+  20   1          {
+  21   2              err_handle(1, "list_append_out_mem",-1);
+  22   2          }
+  23   1      }
+  24          
+  25          //向列表第一列末尾添加a，向第二列末尾添加b
+  26          void expr_list_append(EXPR_LIST *lists, u32 a, u32 b)
+  27          {
+  28   1          lists->list[lists->index][0] = a;
+  29   1          lists->list[lists->index][1] = b;
+  30   1          lists->index++;
+  31   1      
+  32   1          if (lists->index >= lists->MAX_LEN)
+  33   1          {
+  34   2              err_handle(1, "list_append_out_mem",-1);
+  35   2          }
+  36   1      }
+  37          
+  38          //删除列表第a行的两个数
+  39          void expr_list_pop(EXPR_LIST *lists, u32 a)
+  40          {
+  41   1          u32 i;
+  42   1          if (lists->index == 0)
+  43   1          {
+  44   2              err_handle(1, "list_pop_out_mem", -1);
+  45   2          }
+  46   1      
+  47   1          for (i = a; i + 1 < lists->index; i++)
+  48   1          {
+  49   2              lists->list[i][0] = lists->list[i + 1][0];
+  50   2              lists->list[i][1] = lists->list[i + 1][1];
+  51   2          }
+  52   1      
+  53   1          lists->index--;
+  54   1      }
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 2   
+
+  55          
+  56          //打印list
+  57          void list_print(LIST *lists)
+  58          {
+  59   1          u32 i,a,b;
+  60   1      
+  61   1          printf("\n");
+  62   1          for (i = 0; i < lists->index; i++)
+  63   1          {
+  64   2              a = lists->list[i][0];
+  65   2              b = lists->list[i][1];
+  66   2      
+  67   2              printf("[%u, %u]\n", a, b);
+  68   2          }
+  69   1          printf("\n");
+  70   1      }
+  71          
+  72          //判断字符串A的index处是否以字符串B开头
+  73          u8 str_eq(char *A, u32 index, char *B)
+  74          {
+  75   1          u8 flag = 1;
+  76   1          u8 len = strlen(B);
+  77   1          u32 i;
+  78   1      
+  79   1          for (i = index; i < len + index; i++)
+  80   1          {
+  81   2              if (A[i] != B[i - index])
+  82   2              {
+  83   3                  flag = 0;
+  84   3                  break;
+  85   3              }
+  86   2          }
+  87   1      
+  88   1          return flag;
+  89   1      }
+  90          
+  91          //判断字符串A的index处，是否有关键字
+  92          //如果有关键字，index自增以跳过关键词
+  93          int key_in(char *A, u32 *index)
+  94          {
+  95   1          //enum KEY {NL, DOT, PRI, IF, ENDIF, WHILE, ENDWH, SPACE, VAR, FUNC, CALL, RET, RE, WR};
+  96   1          if (str_eq(A, *index, "\r\n"))
+  97   1          {
+  98   2              *index += 1;
+  99   2              return 0;
+ 100   2          }
+ 101   1          if (str_eq(A, *index, "\n"))
+ 102   1          {
+ 103   2              *index += 1;
+ 104   2              return 0;
+ 105   2          }
+ 106   1          if (str_eq(A, *index, ","))
+ 107   1          {
+ 108   2              *index += 1;
+ 109   2              return 1;
+ 110   2          }
+ 111   1          if (str_eq(A, *index, "pri"))
+ 112   1          {
+ 113   2              *index += 3;
+ 114   2              return 2;
+ 115   2          }
+ 116   1          if (str_eq(A, *index, "if"))
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 3   
+
+ 117   1          {
+ 118   2              *index += 2;
+ 119   2              return 3;
+ 120   2          }
+ 121   1          if (str_eq(A, *index, "endif"))
+ 122   1          {
+ 123   2              *index += 5;
+ 124   2              return 4;
+ 125   2          }
+ 126   1          if (str_eq(A, *index, "while"))
+ 127   1          {
+ 128   2              *index += 5;
+ 129   2              return 5;
+ 130   2          }
+ 131   1          if (str_eq(A, *index, "endwh"))
+ 132   1          {
+ 133   2              *index += 5;
+ 134   2              return 6;
+ 135   2          }
+ 136   1          if (str_eq(A, *index, " "))
+ 137   1          {
+ 138   2              *index += 1;
+ 139   2              return 7;
+ 140   2          }
+ 141   1          if (str_eq(A, *index, "\t"))
+ 142   1          {
+ 143   2              *index += 1;
+ 144   2              return 7;
+ 145   2          }
+ 146   1          if (str_eq(A, *index, "var"))
+ 147   1          {
+ 148   2              *index += 3;
+ 149   2              return 8;
+ 150   2          }
+ 151   1          if (str_eq(A, *index, "func"))
+ 152   1          {
+ 153   2              *index += 4;
+ 154   2              return 9;
+ 155   2          }
+ 156   1          if (str_eq(A, *index, "call"))
+ 157   1          {
+ 158   2              *index += 4;
+ 159   2              return 10;
+ 160   2          }
+ 161   1          if (str_eq(A, *index, "ret"))
+ 162   1          {
+ 163   2              *index += 4;
+ 164   2              return 11;
+ 165   2          }
+ 166   1          if (str_eq(A, *index, "read"))
+ 167   1          {
+ 168   2              *index += 4;
+ 169   2              return 12;
+ 170   2          }
+ 171   1          if (str_eq(A, *index, "write"))
+ 172   1          {
+ 173   2              *index += 5;
+ 174   2              return 13;
+ 175   2          }
+ 176   1      
+ 177   1          return -1;
+ 178   1      }
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 4   
+
+ 179          
+ 180          //判断字符串A的index处，是否有运算符
+ 181          //如果有运算符，index自增以跳过关键词
+ 182          int op_in(char *A, u32 *index)
+ 183          {
+ 184   1          //enum OPS {EQ = 80, ADD, MIN, MUX, DIV, LB, RB, BIGER, SMALLER, IFEQ};
+ 185   1          if (str_eq(A, *index, "=="))
+ 186   1          {
+ 187   2              *index += 2;
+ 188   2              return 89;
+ 189   2          }
+ 190   1          else if (str_eq(A, *index, "="))
+ 191   1          {
+ 192   2              *index += 1;
+ 193   2              return 80;
+ 194   2          }
+ 195   1          else if (str_eq(A, *index, "+"))
+ 196   1          {
+ 197   2              *index += 1;
+ 198   2              return 81;
+ 199   2          }
+ 200   1          else if (str_eq(A, *index, "-"))
+ 201   1          {
+ 202   2              *index += 1;
+ 203   2              return 82;
+ 204   2          }
+ 205   1          else if (str_eq(A, *index, "*"))
+ 206   1          {
+ 207   2              *index += 1;
+ 208   2              return 83;
+ 209   2          }
+ 210   1          else if (str_eq(A, *index, "/"))
+ 211   1          {
+ 212   2              *index += 1;
+ 213   2              return 84;
+ 214   2          }
+ 215   1          else if (str_eq(A, *index, "("))
+ 216   1          {
+ 217   2              *index += 1;
+ 218   2              return 85;
+ 219   2          }
+ 220   1          else if (str_eq(A, *index, ")"))
+ 221   1          {
+ 222   2              *index += 1;
+ 223   2              return 86;
+ 224   2          }
+ 225   1          else if (str_eq(A, *index, ">"))
+ 226   1          {
+ 227   2              *index += 1;
+ 228   2              return 87;
+ 229   2          }
+ 230   1          else if (str_eq(A, *index, "<"))
+ 231   1          {
+ 232   2              *index += 1;
+ 233   2              return 88;
+ 234   2          }
+ 235   1      
+ 236   1          return -1;
+ 237   1      }
+ 238          
+ 239          //判断字符串A的index处，是否有其他符号
+ 240          //如果有，index自增以跳过关键词，并将这些符号存入code_list
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 5   
+
+ 241          int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
+ 242          {
+ 243   1          long num;
+ 244   1      
+ 245   1          //MISC {TYPEVAR = 160, CONST_INT, STR};
+ 246   1          //以0~9开头的符号为数字
+ 247   1          if ((A[*index] >= 48) & (A[*index] <= 57))
+ 248   1          {
+ 249   2              //计算数字值
+ 250   2              num = A[*index] - 48;
+ 251   2              *index += 1;
+ 252   2      
+ 253   2              while ((A[*index] >= 48) & (A[*index] <= 57))
+ 254   2              {
+ 255   3                  num = num * 10 + A[*index] - 48;
+ 256   3                  *index += 1;
+ 257   3              }
+ 258   2      
+ 259   2              if ((num > 2147483647) | (num < -2147483648))
+ 260   2              {
+ 261   3                  err_handle(2, A, *index);
+ 262   3              }
+ 263   2      
+ 264   2              list_append(lists, (u32)num, 161);
+ 265   2      
+ 266   2              return 161;
+ 267   2          }
+ 268   1          //以"开头的符号为字符串
+ 269   1          else if (A[*index] == '"')
+ 270   1          {
+ 271   2              *index += 1;
+ 272   2              while (A[*index] != '"')
+ 273   2              {
+ 274   3                  list_append(lists, A[*index], 162);
+ 275   3                  *index += 1;
+ 276   3              }
+ 277   2              *index += 1;
+ 278   2      
+ 279   2              return 162;
+ 280   2          }
+ 281   1          //将变量替换为代号
+ 282   1          else
+ 283   1          {
+ 284   2              int var_index = var_name_in(A, varLists, index);
+ 285   2              if (var_index >= 0)
+ 286   2              {
+ 287   3                  *index += strlen(varLists->var_name[var_index]) + 1;
+ 288   3                  list_append(lists, var_index, 160);
+ 289   3                  return 160;
+ 290   3              }
+ 291   2          }
+ 292   1      
+ 293   1      
+ 294   1          return -1;
+ 295   1      }
+ 296          
+ 297          //获得变量的名字
+ 298          void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
+ 299          {
+ 300   1          u8 str_index;
+ 301   1      
+ 302   1          do
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 6   
+
+ 303   1          {
+ 304   2              *index += 1;
+ 305   2          }
+ 306   1          while(code_str[*index] == ' ');  //跳过空格
+ 307   1      
+ 308   1          str_index = 0;
+ 309   1      
+ 310   1          do
+ 311   1          {
+ 312   2              varLists->var_name[varLists->var_num][str_index] = code_str[*index];
+ 313   2              printf("                %d_%c", code_str[*index], code_str[*index]);
+ 314   2              *index += 1;
+ 315   2              str_index++;
+ 316   2              if (str_index >= MAX_VAR_LEN - 1)
+ 317   2              {
+ 318   3                  err_handle(3, code_str, *index);
+ 319   3              }
+ 320   2          }
+ 321   1          while((code_str[*index] != ' ') & (code_str[*index] != '\r')
+ 322   1                  & (code_str[*index] != '\n'));  //读取字符直到有空格或换行
+ 323   1          varLists->var_name[varLists->var_num][str_index] = '\0';
+ 324   1          *index += 1;
+ 325   1          varLists->var_num += 1;
+ 326   1      
+ 327   1          if (varLists->var_num >= MAX_VAR_NUM)
+ 328   1          {
+ 329   2              err_handle(4, code_str, *index);
+ 330   2          }
+ 331   1      }
+ 332          
+ 333          //检查词语是否是变量，若是则获得变量编号
+ 334          int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
+ 335          {
+ 336   1          u8 str_index = 0;
+ 337   1          u32 var_index;
+ 338   1      
+ 339   1          char str[20];
+ 340   1      
+ 341   1          if (*index >= strlen(code_str))
+ 342   1          {
+ 343   2              return -1;
+ 344   2          }
+ 345   1      
+ 346   1          while(code_str[str_index + *index] != ' ')  //读取字符直到有空格
+ 347   1          {
+ 348   2              str[str_index] = code_str[str_index + *index];
+ 349   2              str_index++;
+ 350   2      
+ 351   2              if (str_index >= 20)
+ 352   2              {
+ 353   3                  err_handle(3, code_str, *index);
+ 354   3              }
+ 355   2          }
+ 356   1          str[str_index] = '\0';
+ 357   1      
+ 358   1          var_index = 0;
+ 359   1          while (1)
+ 360   1          {
+ 361   2              //查找变量列表中是否有该变量
+ 362   2              if (var_index >= varLists->var_num)
+ 363   2              {
+ 364   3                  return -1;
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 7   
+
+ 365   3              }
+ 366   2      
+ 367   2              if (str_eq(str, 0, varLists->var_name[var_index]))
+ 368   2              {
+ 369   3                  return var_index;
+ 370   3              }
+ 371   2              var_index++;
+ 372   2          }
+ 373   1      }
+ 374          
+ 375          //打印变量信息
+ 376          void pri_var(VARLISTS *varLists)
+ 377          {
+ 378   1          u8 i;
+ 379   1          printf("\n");
+ 380   1          for (i = 0; i < varLists->var_num; i++)
+ 381   1          {
+ 382   2              printf("var_name:%s\n", varLists->var_name[i]);
+ 383   2          }
+ 384   1          printf("\n");
+ 385   1      }
+ 386          
+ 387          //计算一行代码中，最后一个元素的index
+ 388          u32 find_end_index(LIST *lists, u32 start)
+ 389          {
+ 390   1          u32 expr_end_index;
+ 391   1      
+ 392   1          for (expr_end_index = start; ; expr_end_index++)
+ 393   1          {
+ 394   2              enum KEY keywords = NL;
+ 395   2              if (lists->list[expr_end_index][1] == keywords)
+ 396   2              {
+ 397   3                  return expr_end_index;
+ 398   3              }
+ 399   2          }
+ 400   1      }
+ 401          
+ 402          //打印字符串index后的15个字符
+ 403          void pr_n15_char(char *code_str, u32 index)
+ 404          {
+ 405   1          u8 ind = 0;
+ 406   1          printf("index: %u\n", index);
+ 407   1          printf("str:\n");
+ 408   1          for (ind = 0; ind < 15; ind++)
+ 409   1          {
+ 410   2              if (index+ind >= strlen(code_str))
+ 411   2              {
+ 412   3                  break;
+ 413   3              }
+ 414   2              printf("%c", code_str[index+ind]);
+ 415   2          }
+ 416   1          printf("\n");
+ 417   1      }
+ 418          
+ 419          //分词器
+ 420          void parser(char *code_str, LIST *lists, VARLISTS *varLists)
+ 421          {
+ 422   1          u32 max_index = strlen(code_str);
+ 423   1          u32 index = 0;
+ 424   1          u32 line_num = 0;
+ 425   1          int key_in_num,op_in_num,miscop_in_num;
+ 426   1      
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 8   
+
+ 427   1          //初始化代码序列
+ 428   1          list_init(lists);
+ 429   1          varLists->var_num = 0;
+ 430   1      
+ 431   1          while (1)
+ 432   1          {
+ 433   2              //pr_n15_char(code_str, index);
+ 434   2      
+ 435   2              //识别关键字
+ 436   2              key_in_num = key_in(code_str, &index);
+ 437   2              if (key_in_num >= 0)
+ 438   2              {
+ 439   3                  if (key_in_num == 7)  //跳过空格
+ 440   3                  {
+ 441   4                      continue;
+ 442   4                  }
+ 443   3                  else if (key_in_num == 8)  //定义新变量
+ 444   3                  {
+ 445   4                      get_var_name(code_str, varLists, &index);
+ 446   4                      continue;
+ 447   4                  }
+ 448   3      
+ 449   3                  list_append(lists, key_in_num, key_in_num);
+ 450   3      
+ 451   3                  continue;
+ 452   3              }
+ 453   2      
+ 454   2              //识别操作符
+ 455   2              op_in_num = op_in(code_str, &index);
+ 456   2              if (op_in_num > 0)
+ 457   2              {
+ 458   3                  list_append(lists, op_in_num, op_in_num);
+ 459   3                  continue;
+ 460   3              }
+ 461   2      
+ 462   2              //识别其他类型标识符
+ 463   2              miscop_in_num = miscop_in(code_str, &index, lists, varLists);
+ 464   2              if (miscop_in_num > 0)
+ 465   2              {
+ 466   3                  continue;
+ 467   3              }
+ 468   2      
+ 469   2              index += 1;
+ 470   2              //代码读完
+ 471   2              if (index >= max_index)
+ 472   2              {
+ 473   3                  break;
+ 474   3              }
+ 475   2      
+ 476   2              err_handle(6, code_str, index);
+ 477   2      
+ 478   2          }
+ 479   1      }
+ 480          
+ 481          //计算对应符号的位置
+ 482          //if对应endif while对应endwh endwh对应while   call add对应 func add
+ 483          void index_match(char *code_str, LIST *lists)
+ 484          {
+ 485   1          u32 index = 0;
+ 486   1          u32 index_ = 0;
+ 487   1          u8 keycount = 0;
+ 488   1      
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 9   
+
+ 489   1          enum KEY keywords;
+ 490   1      
+ 491   1          while(1)
+ 492   1          {
+ 493   2              keywords = IF;
+ 494   2              if (lists->list[index][1] == keywords)
+ 495   2              {
+ 496   3                  //处理if的对应符号
+ 497   3                  index_ = index;
+ 498   3                  while(1)
+ 499   3                  {
+ 500   4                      index_ += 1;
+ 501   4      
+ 502   4                      //处理if嵌套
+ 503   4                      keywords = IF;
+ 504   4                      if (lists->list[index_][1] == keywords)
+ 505   4                      {
+ 506   5                          keycount += 1;
+ 507   5                      }
+ 508   4      
+ 509   4                      keywords = ENDIF;
+ 510   4                      if (index_ >= lists->index)
+ 511   4                      {
+ 512   5                          err_handle(7, code_str, index);
+ 513   5                          return;
+ 514   5                      }
+ 515   4                      else if ((lists->list[index_][1] == keywords) & (keycount == 0))
+ 516   4                      {
+ 517   5                          //保存if对应的endif的index
+ 518   5                          lists->list[index][0] = index_;
+ 519   5                          //print(index_)
+ 520   5                          break;
+ 521   5                      }
+ 522   4      
+ 523   4                      else if ((lists->list[index_][1] == keywords) & (keycount != 0))
+ 524   4                      {
+ 525   5                          keycount -= 1;
+ 526   5                      }
+ 527   4                  }
+ 528   3              }
+ 529   2      
+ 530   2              keywords = WHILE;
+ 531   2              if (lists->list[index][1] == keywords)
+ 532   2              {
+ 533   3                  //处理while的对应符号
+ 534   3                  index_ = index;
+ 535   3                  while(1)
+ 536   3                  {
+ 537   4                      index_ += 1;
+ 538   4      
+ 539   4                      //处理while嵌套
+ 540   4                      keywords = WHILE;
+ 541   4                      if (lists->list[index_][1] == keywords)
+ 542   4                      {
+ 543   5                          keycount += 1;
+ 544   5                      }
+ 545   4      
+ 546   4                      keywords = ENDWH;
+ 547   4                      if (index_ >= lists->index)
+ 548   4                      {
+ 549   5                          err_handle(8, code_str, index);
+ 550   5                          return;
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 10  
+
+ 551   5                      }
+ 552   4                      else if ((lists->list[index_][1] == keywords) & (keycount == 0))
+ 553   4                      {
+ 554   5                          //保存while对应的endif的index
+ 555   5                          lists->list[index][0] = index_ + 1;
+ 556   5                          //print(index_)
+ 557   5                          break;
+ 558   5                      }
+ 559   4      
+ 560   4                      else if ((lists->list[index_][1] == keywords) & (keycount != 0))
+ 561   4                      {
+ 562   5                          keycount -= 1;
+ 563   5                      }
+ 564   4                  }
+ 565   3              }
+ 566   2      
+ 567   2              keywords = ENDWH;
+ 568   2              if (lists->list[index][1] == keywords)
+ 569   2              {
+ 570   3                  //处理endwh的对应符号
+ 571   3                  index_ = index;
+ 572   3                  while(1)
+ 573   3                  {
+ 574   4                      index_ -= 1;
+ 575   4      
+ 576   4                      //处理endwh嵌套
+ 577   4                      keywords = ENDWH;
+ 578   4                      if (lists->list[index_][1] == keywords)
+ 579   4                      {
+ 580   5                          keycount += 1;
+ 581   5                      }
+ 582   4      
+ 583   4                      keywords = WHILE;
+ 584   4                      if (index_ >= lists->index)
+ 585   4                      {
+ 586   5                          err_handle(9, code_str, index);
+ 587   5                          return;
+ 588   5                      }
+ 589   4                      else if ((lists->list[index_][1] == keywords) & (keycount == 0))
+ 590   4                      {
+ 591   5                          //保存if对应的endif的index
+ 592   5                          lists->list[index][0] = index_ - 1;
+ 593   5                          //print(index_)
+ 594   5                          break;
+ 595   5                      }
+ 596   4      
+ 597   4                      else if ((lists->list[index_][1] == keywords) & (keycount != 0))
+ 598   4                      {
+ 599   5                          keycount -= 1;
+ 600   5                      }
+ 601   4                  }
+ 602   3              }
+ 603   2      
+ 604   2              keywords = CALL;
+ 605   2              if (lists->list[index][1] == keywords)
+ 606   2              {
+ 607   3                  //处理call的对应符号
+ 608   3                  u32 func_name = lists->list[index+1][0];
+ 609   3                  u32 i;
+ 610   3                  enum MISC misc;
+ 611   3      
+ 612   3                  keywords = FUNC;
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 11  
+
+ 613   3                  //遍历代码，寻找对应的func
+ 614   3                  for (i = 0; ; i++)
+ 615   3                  {
+ 616   4                      if (lists->list[i][1] == keywords)
+ 617   4                      {
+ 618   5                          i++;
+ 619   5      
+ 620   5                          misc = CONST_INT;
+ 621   5                          if ((lists->list[i][1] == misc) & (lists->list[i][0] == func_name))
+ 622   5                          {
+ 623   6                              lists->list[index][0] = i + 1;
+ 624   6                              break;
+ 625   6                          }
+ 626   5                          else if (lists->list[i][1] != misc)
+ 627   5                          {
+ 628   6                              err_handle(11, code_str, index);
+ 629   6                          }
+ 630   5                      }
+ 631   4      
+ 632   4                      if (i >= lists->index)
+ 633   4                      {
+ 634   5                          err_handle(12, code_str, index);
+ 635   5                          break;
+ 636   5                      }
+ 637   4                  }
+ 638   3              }
+ 639   2      
+ 640   2              keywords = FUNC;
+ 641   2              if (lists->list[index][1] == keywords)
+ 642   2              {
+ 643   3                  //处理func的对应符号
+ 644   3                  index_ = index;
+ 645   3                  while(1)
+ 646   3                  {
+ 647   4                      index_ += 1;
+ 648   4      
+ 649   4                      keywords = RET;
+ 650   4                      if (index_ >= lists->index)
+ 651   4                      {
+ 652   5                          err_handle(13, code_str, index);
+ 653   5                          return;
+ 654   5                      }
+ 655   4                      else if ((lists->list[index_][1] == keywords))
+ 656   4                      {
+ 657   5                          //保存func对应的ret的index
+ 658   5                          lists->list[index][0] = index_ + 1;
+ 659   5                          //print(index_)
+ 660   5                          break;
+ 661   5                      }
+ 662   4                  }
+ 663   3              }
+ 664   2      
+ 665   2              index += 1;
+ 666   2              if (index >= lists->index)
+ 667   2              {
+ 668   3                  break;
+ 669   3              }
+ 670   2          }
+ 671   1      }
+ 672          
+ 673          //表达式计算器
+ 674          int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 12  
+
+ 675          {
+ 676   1          enum OPS ops, ops2, ops3;
+ 677   1          enum MISC misc_op, misc_op2;
+ 678   1          u32 i;
+ 679   1          u8 op;
+ 680   1          char bracket_num;
+ 681   1          u8 max_priority;
+ 682   1          long expr_value;
+ 683   1          u32 index;
+ 684   1          u32 ind;
+ 685   1          u32 priority;
+ 686   1          int num_A;
+ 687   1          int num_B;
+ 688   1      
+ 689   1          //标注优先级
+ 690   1          EXPR_LIST expr_list;   //创建LIST保存对应的符号优先级
+ 691   1          expr_list.index = 0;
+ 692   1          expr_list.MAX_LEN = MAX_EXPR_LEN;
+ 693   1          bracket_num = 0;   //记录小括号数量
+ 694   1      
+ 695   1          for (i = expr_start; i < expr_end; i++)
+ 696   1          {
+ 697   2              op = lists->list[i][1];
+ 698   2      
+ 699   2              ops = LB;
+ 700   2              if (op == ops)
+ 701   2              {
+ 702   3                  bracket_num += 5;
+ 703   3                  if (bracket_num > 120)  //小括号最多嵌套14层
+ 704   3                  {
+ 705   4                      expr_err(lists, varLists, 0, i);
+ 706   4                  }
+ 707   3                  continue;
+ 708   3              }
+ 709   2      
+ 710   2              ops = RB;
+ 711   2              if (op == ops)
+ 712   2              {
+ 713   3                  bracket_num -= 5;
+ 714   3      
+ 715   3                  if (bracket_num < 0)
+ 716   3                  {
+ 717   4                      expr_err(lists, varLists, 1, i);
+ 718   4                  }
+ 719   3                  continue;
+ 720   3              }
+ 721   2      
+ 722   2              ops = BIGER;
+ 723   2              ops2 = SMALLER;
+ 724   2              ops3 = IFEQ;
+ 725   2              //比较运算优先级为1 + 5 * 括号数
+ 726   2              if ((op == ops)|(op == ops2)|(op == ops3))
+ 727   2              {
+ 728   3                  expr_list_append(&expr_list, op, 1 + bracket_num);
+ 729   3                  continue;
+ 730   3              }
+ 731   2      
+ 732   2              ops = ADD;
+ 733   2              ops2 = MINUS;
+ 734   2              //加法优先级为2 + 5 * 括号数
+ 735   2              if ((op == ops)|(op == ops2))
+ 736   2              {
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 13  
+
+ 737   3                  expr_list_append(&expr_list, op, 2 + bracket_num);
+ 738   3                  continue;
+ 739   3              }
+ 740   2      
+ 741   2              ops = MUX;
+ 742   2              ops2 = DIV;
+ 743   2              //乘法优先级为3 + 5 * 括号数
+ 744   2              if ((op == ops)|(op == ops2))
+ 745   2              {
+ 746   3                  expr_list_append(&expr_list, op, 3 + bracket_num);
+ 747   3                  continue;
+ 748   3              }
+ 749   2      
+ 750   2              misc_op = CONST_INT;
+ 751   2              //常数优先级为0
+ 752   2              if (misc_op == op)
+ 753   2              {
+ 754   3                  u32 var_name = lists->list[i][0];
+ 755   3                  expr_list_append(&expr_list, (int)var_name, 0);
+ 756   3                  continue;
+ 757   3              }
+ 758   2      
+ 759   2              misc_op = TYPEVAR;
+ 760   2              //变量优先级为0
+ 761   2              if (misc_op == op)
+ 762   2              {
+ 763   3                  u32 var_name = lists->list[i][0];
+ 764   3                  int var_value = varLists->var_value[var_name];
+ 765   3                  expr_list_append(&expr_list, var_value, 0);
+ 766   3                  continue;
+ 767   3              }
+ 768   2      
+ 769   2              expr_err(lists, varLists, 2, i);
+ 770   2          }
+ 771   1      
+ 772   1          max_priority = 0;
+ 773   1          for (i = 0; i < expr_list.index; i++)
+ 774   1          {
+ 775   2              if (max_priority < expr_list.list[i][1])
+ 776   2              {
+ 777   3                  max_priority = expr_list.list[i][1];
+ 778   3              }
+ 779   2          }
+ 780   1          //printf("max_priority %d\n", max_priority);
+ 781   1      
+ 782   1          for (priority = 0; priority < max_priority; priority++)
+ 783   1          {
+ 784   2              index = 0;
+ 785   2      
+ 786   2              while(1)
+ 787   2              {
+ 788   3                  //寻找当前优先级对应的运算，优先计算高优先级
+ 789   3                  index = 0;
+ 790   3                  for (ind = 0; ind < expr_list.index; ind++)
+ 791   3                  {
+ 792   4                      if (expr_list.list[ind][1] == max_priority - priority)
+ 793   4                      {
+ 794   5                          break;
+ 795   5                      }
+ 796   4                      index += 1;
+ 797   4                  }
+ 798   3      
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 14  
+
+ 799   3                  //当前优先级无对应运算符
+ 800   3                  if (index == expr_list.index)
+ 801   3                  {
+ 802   4                      break;
+ 803   4                  }
+ 804   3      
+ 805   3                  //打印计算过程
+ 806   3                  /*
+ 807   3                  printf("\n");
+ 808   3                  for (u8 i = 0; i < expr_list.index; i++)
+ 809   3                  {
+ 810   3                      printf("%d ", expr_list.list[i][0]);
+ 811   3                      printf("%d \n", expr_list.list[i][1]);
+ 812   3                  }
+ 813   3                  printf("\n");
+ 814   3                  */
+ 815   3      
+ 816   3                  if (index == 0)     //运算符出现在表达式开头
+ 817   3                  {
+ 818   4                      num_A = 0;
+ 819   4                      expr_err(lists, varLists, 3, index);
+ 820   4                  }
+ 821   3                  else      //变量与常量
+ 822   3                  {
+ 823   4                      num_A = (int)expr_list.list[index - 1][0];
+ 824   4                  }
+ 825   3      
+ 826   3                  if (index == expr_list.index - 1)     //运算符出现在表达式结尾
+ 827   3                  {
+ 828   4                      num_B = 0;
+ 829   4                      expr_err(lists, varLists, 3, index);
+ 830   4                  }
+ 831   3                  else      //变量与常量
+ 832   3                  {
+ 833   4                      num_B = (int)expr_list.list[index + 1][0];
+ 834   4                  }
+ 835   3                  //printf("A:%d B:%d \n\n", num_A, num_B);
+ 836   3      
+ 837   3      
+ 838   3                  op = expr_list.list[index][0];
+ 839   3                  //enum OPS {EQ = 80, ADD, MINUS, MUX, DIV, LB, RB, BIGER, SMALLER, IFEQ};
+ 840   3                  if (op == 83)   //乘
+ 841   3                  {
+ 842   4                      expr_value = num_A * num_B;
+ 843   4                  }
+ 844   3                  else if (op == 84)  //除
+ 845   3                  {
+ 846   4                      expr_value = num_A / num_B;
+ 847   4                  }
+ 848   3                  else if (op == 81)  //加
+ 849   3                  {
+ 850   4                      expr_value = num_A + num_B;
+ 851   4                  }
+ 852   3                  else if (op == 82)  //减
+ 853   3                  {
+ 854   4                      expr_value = num_A - num_B;
+ 855   4                  }
+ 856   3                  else if (op == 87)
+ 857   3                  {
+ 858   4                      expr_value = num_A > num_B;
+ 859   4                  }
+ 860   3                  else if (op == 88)
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 15  
+
+ 861   3                  {
+ 862   4                      expr_value = num_A < num_B;
+ 863   4                  }
+ 864   3                  else if (op == 89)
+ 865   3                  {
+ 866   4                      expr_value = (num_A == num_B);
+ 867   4                  }
+ 868   3      
+ 869   3                  if ((expr_value > 2147483647) | (expr_value < -2147483648))
+ 870   3                  {
+ 871   4                      expr_err(lists, varLists, 4, index);
+ 872   4                  }
+ 873   3      
+ 874   3                  //运算符与表达式替换为结果
+ 875   3                  expr_list_pop(&expr_list, index-1);
+ 876   3                  expr_list_pop(&expr_list, index-1);
+ 877   3                  expr_list.list[index-1][0] = (int)expr_value;
+ 878   3                  expr_list.list[index-1][1] = 0;
+ 879   3              }
+ 880   2          }
+ 881   1      
+ 882   1          return expr_list.list[0][0];
+ 883   1      }
+*** WARNING C280 IN LINE 677 OF BASIC.C: 'misc_op2': unreferenced local variable
+ 884          
+ 885          //打印分词后的结果
+ 886          void pri_parser(LIST *lists, VARLISTS *varLists, u32 index_start, u32 index_end)
+ 887          {
+ 888   1          u32 ind;
+ 889   1          u32 word_name, word_type;
+ 890   1      
+ 891   1          for (ind = index_start; ind < index_end; ind ++)
+ 892   1          {
+ 893   2              word_name = lists->list[ind][0];
+ 894   2              word_type = lists->list[ind][1];
+ 895   2      
+ 896   2              //printf("%u %u \n", word_name, word_type);
+ 897   2              printf("index=%u  ", ind);
+ 898   2      
+ 899   2              //enum KEY {NL, DOT, PRI, IF, ENDIF, WHILE, ENDWH, SPACE, VAR};
+ 900   2              if (word_type == 0)
+ 901   2              {
+ 902   3                  printf("NL    NL\n");
+ 903   3              }
+ 904   2              else if (word_type == 1)
+ 905   2              {
+ 906   3                  printf(",     ,\n");
+ 907   3              }
+ 908   2              else if (word_type == 2)
+ 909   2              {
+ 910   3                  printf("pri   pri\n");
+ 911   3              }
+ 912   2              else if (word_type == 3)
+ 913   2              {
+ 914   3                  printf("%d", word_name);
+ 915   3                  printf("    if\n");
+ 916   3              }
+ 917   2              else if (word_type == 4)
+ 918   2              {
+ 919   3                  printf("endif endif\n");
+ 920   3              }
+ 921   2              else if (word_type == 5)
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 16  
+
+ 922   2              {
+ 923   3                  printf("%d", word_name);
+ 924   3                  printf("     while\n");
+ 925   3              }
+ 926   2              else if (word_type == 6)
+ 927   2              {
+ 928   3                  printf("%d", word_name);
+ 929   3                  printf("     endwh\n");
+ 930   3              }
+ 931   2              else if (word_type == 7)
+ 932   2              {
+ 933   3                  printf("space space\n");
+ 934   3              }
+ 935   2              else if (word_type == 8)
+ 936   2              {
+ 937   3                  printf("var   var\n");
+ 938   3              }
+ 939   2              else if (word_type == 9)
+ 940   2              {
+ 941   3                  printf("%d", word_name);
+ 942   3                  printf("   func\n");
+ 943   3              }
+ 944   2              else if (word_type == 10)
+ 945   2              {
+ 946   3                  printf("%d", word_name);
+ 947   3                  printf("    call\n");
+ 948   3              }
+ 949   2              else if (word_type == 11)
+ 950   2              {
+ 951   3                  printf("ret   ret\n");
+ 952   3              }
+ 953   2              else if (word_type == 12)
+ 954   2              {
+ 955   3                  printf("read  read\n");
+ 956   3              }
+ 957   2              else if (word_type == 13)
+ 958   2              {
+ 959   3                  printf("write write\n");
+ 960   3              }
+ 961   2      
+ 962   2              //enum OPS {EQ = 80, ADD, MIN, MUX, DIV, LB, RB, BIGER, SMALLER, IFEQ};
+ 963   2              if (word_type == 80)
+ 964   2              {
+ 965   3                  printf("=     =\n");
+ 966   3              }
+ 967   2              else if (word_type == 81)
+ 968   2              {
+ 969   3                  printf("+     +\n");
+ 970   3              }
+ 971   2              else if (word_type == 82)
+ 972   2              {
+ 973   3                  printf("-     -\n");
+ 974   3              }
+ 975   2              else if (word_type == 83)
+ 976   2              {
+ 977   3                  printf("*     *\n");
+ 978   3              }
+ 979   2              else if (word_type == 84)
+ 980   2              {
+ 981   3                  printf("/     /\n");
+ 982   3              }
+ 983   2              else if (word_type == 85)
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 17  
+
+ 984   2              {
+ 985   3                  printf("(     (\n");
+ 986   3              }
+ 987   2              else if (word_type == 86)
+ 988   2              {
+ 989   3                  printf(")     )\n");
+ 990   3              }
+ 991   2              else if (word_type == 87)
+ 992   2              {
+ 993   3                  printf(">     >\n");
+ 994   3              }
+ 995   2              else if (word_type == 88)
+ 996   2              {
+ 997   3                  printf("<     <\n");
+ 998   3              }
+ 999   2              else if (word_type == 88)
+1000   2              {
+1001   3                  printf("==   ==\n");
+1002   3              }
+1003   2      
+1004   2              //enum MISC {TYPEVAR = 160, CONST_INT, STR};
+1005   2              if (word_type == 160)
+1006   2              {
+1007   3                  printf("%s   ", varLists->var_name[word_name]);
+1008   3                  printf("var_name\n");
+1009   3              }
+1010   2              else if (word_type == 161)
+1011   2              {
+1012   3                  printf("%u   ", word_name);
+1013   3                  printf("const\n");
+1014   3              }
+1015   2              else if (word_type == 162)
+1016   2              {
+1017   3                  printf("%c   ", (char)word_name);
+1018   3                  printf("char\n");
+1019   3              }
+1020   2          }
+1021   1      }
+1022          
+1023          void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
+1024          {
+1025   1          enum KEY keywords;
+1026   1          enum OPS ops;
+1027   1          enum MISC misc_op;
+1028   1      
+1029   1          u32 index = 0;
+1030   1          u8 op;
+1031   1          u32 num;
+1032   1              u32 var_name;
+1033   1      
+1034   1          //函数调用栈
+1035   1          u32 func_stack[MAX_FUN_STACK];
+1036   1          u32 func_stack_index = 0;
+1037   1      
+1038   1          while(1)
+1039   1          {
+1040   2              if (index >= lists->index)
+1041   2              {
+1042   3                  break;  //  程序执行完
+1043   3              }
+1044   2              op = lists->list[index][1];
+1045   2              num = lists->list[index][0];   //printf("index: %d\n", index);
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 18  
+
+1046   2      
+1047   2              keywords = NL;
+1048   2              if (op == keywords)
+1049   2              {
+1050   3                  index++;
+1051   3                  continue;
+1052   3              }
+1053   2      
+1054   2              keywords = PRI;
+1055   2              //pri指令可以打印整数、变量、字符串，暂不支持表达式打印
+1056   2              if (op == keywords)
+1057   2              {
+1058   3                  while(1)
+1059   3                  {
+1060   4                      index++;
+1061   4                      op = lists->list[index][1];
+1062   4                      num = lists->list[index][0];
+1063   4      
+1064   4                      misc_op = CONST_INT;
+1065   4                      if (op == misc_op)
+1066   4                      {
+1067   5                          printf("%d ", (int)num);     //打印整数
+1068   5                          continue;
+1069   5                      }
+1070   4      
+1071   4                      misc_op = TYPEVAR;
+1072   4                      if (op == TYPEVAR)
+1073   4                      {
+1074   5                          printf("%d ", (int)varLists->var_value[num]);     //打印变量的值
+1075   5                          continue;
+1076   5                      }
+1077   4      
+1078   4                      misc_op = STR;
+1079   4                      if (op == misc_op)
+1080   4                      {
+1081   5                          printf("%c", num);     //打印字符
+1082   5                          continue;
+1083   5                      }
+1084   4      
+1085   4                      keywords = NL;
+1086   4                      if (op == keywords)
+1087   4                      {
+1088   5                          break;
+1089   5                      }
+1090   4                  }
+1091   3      
+1092   3                  index++;
+1093   3                  continue;
+1094   3              }
+1095   2      
+1096   2              misc_op = TYPEVAR;
+1097   2              //以变量开头的语句为赋值语句
+1098   2              if (op == misc_op)
+1099   2              {
+1100   3                  //寻找赋值语句结尾
+1101   3                  u32 expr_end_index = find_end_index(lists, index+2);
+1102   3      
+1103   3                  int value = expr(varLists, lists, index + 2, expr_end_index);
+1104   3      
+1105   3                  ops = EQ;
+1106   3                  if (lists->list[index + 1][1] != ops)
+1107   3                  {
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 19  
+
+1108   4                      printf("\nindex:%d err: should be \"=\" \n", index);
+1109   4                  }
+1110   3      
+1111   3                  //赋值
+1112   3                  varLists->var_value[num] = value;
+1113   3      
+1114   3                  //表达式读完，跳过index
+1115   3                  index = expr_end_index + 1;
+1116   3      
+1117   3                  continue;
+1118   3              }
+1119   2      
+1120   2              keywords = WHILE;
+1121   2              if (op == keywords)
+1122   2              {
+1123   3                  u32 expr_end_index = find_end_index(lists, index+1);
+1124   3      
+1125   3                  int value = expr(varLists, lists, index+1, expr_end_index);
+1126   3      
+1127   3                  if (value == 1)
+1128   3                  {
+1129   4                      //表达式读完，跳过index，执行下一条语句
+1130   4                      index = expr_end_index + 1;
+1131   4                  }
+1132   3                  else
+1133   3                  {
+1134   4                      index = num;
+1135   4                  }
+1136   3      
+1137   3                  continue;
+1138   3              }
+1139   2      
+1140   2              keywords = ENDWH;
+1141   2              if (op == keywords)
+1142   2              {
+1143   3                  //跳到while
+1144   3                  index = num;
+1145   3                  continue;
+1146   3              }
+1147   2      
+1148   2              keywords = IF;
+1149   2              if (op == keywords)
+1150   2              {
+1151   3                  u32 expr_end_index = find_end_index(lists, index+1);
+1152   3      
+1153   3                  int value = expr(varLists, lists, index+1, expr_end_index);
+1154   3      
+1155   3                  if (value == 1)
+1156   3                  {
+1157   4                      //表达式读完，跳过index，执行下一条语句
+1158   4                      index = expr_end_index + 1;
+1159   4                  }
+1160   3                  else
+1161   3                  {
+1162   4                      index = num;
+1163   4                  }
+1164   3      
+1165   3                  continue;
+1166   3              }
+1167   2      
+1168   2              //函数只能通过CALL调用，不能直接执行
+1169   2              keywords = FUNC;
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 20  
+
+1170   2              if (op == keywords)
+1171   2              {
+1172   3                  //跳转
+1173   3                  index = num;
+1174   3      
+1175   3                  continue;
+1176   3              }
+1177   2      
+1178   2              keywords = CALL;
+1179   2              if (op == keywords)
+1180   2              {
+1181   3                  //索引压栈
+1182   3                  func_stack[func_stack_index] = index + 2;
+1183   3                  func_stack_index++;
+1184   3      
+1185   3                  //跳转
+1186   3                  index = num;
+1187   3      
+1188   3                  continue;
+1189   3              }
+1190   2      
+1191   2              keywords = RET;
+1192   2              if (op == keywords)
+1193   2              {
+1194   3                  //索引出栈
+1195   3      
+1196   3                  func_stack_index--;
+1197   3                  index = func_stack[func_stack_index];
+1198   3      
+1199   3                  continue;
+1200   3              }
+1201   2      
+1202   2              keywords = READ;
+1203   2              if (op == keywords)
+1204   2              {
+1205   3                  u32 address;
+1206   3                  int num;
+1207   3      
+1208   3                  //获得读取地址
+1209   3                  index += 2;
+1210   3                  address = lists->list[index][0];
+1211   3                  op = lists->list[index][1];
+1212   3                  //若是变量，则读取变量值
+1213   3                  misc_op = TYPEVAR;
+1214   3                  if (op == TYPEVAR)
+1215   3                  {
+1216   4                      address = varLists->var_value[address];
+1217   4                  }
+1218   3      
+1219   3                  //读取mem
+1220   3                  if (address >= MEM_SIZE)
+1221   3                  {
+1222   4                      printf("mem read out of range\n");
+1223   4                  }
+1224   3                  num = mem[address];
+1225   3      
+1226   3                  //赋值给变量或内存地址
+1227   3                  index--;
+1228   3                  var_name = lists->list[index][0];
+1229   3                  op = lists->list[index][1];
+1230   3                  //操作数是变量，将读取结果保存到变量中
+1231   3                  misc_op = TYPEVAR;
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 21  
+
+1232   3                  if (op == TYPEVAR)
+1233   3                  {
+1234   4                      varLists->var_value[var_name] = num;
+1235   4                      index += 2;
+1236   4                      continue;
+1237   4                  }
+1238   3                  //操作数是常数，将读取结果保存到mem数组中
+1239   3                  misc_op = CONST_INT;
+1240   3                  if (op == CONST_INT)
+1241   3                  {
+1242   4                      mem[var_name] = num;
+1243   4                      index += 2;
+1244   4                      continue;
+1245   4                  }
+1246   3              }
+1247   2      
+1248   2              keywords = WRITE;
+1249   2              if (op == keywords)
+1250   2              {
+1251   3                  u32 address;
+1252   3                  int num;
+1253   3      
+1254   3                  //获得操作数
+1255   3                  index += 2;
+1256   3                  num = lists->list[index][0];
+1257   3                  op = lists->list[index][1];
+1258   3                  //若是变量，则读取变量值
+1259   3                  misc_op = TYPEVAR;
+1260   3                  if (op == TYPEVAR)
+1261   3                  {
+1262   4                      num = varLists->var_value[num];
+1263   4                  }
+1264   3      
+1265   3                  //获取写入地址并写入
+1266   3                  index--;
+1267   3                  var_name = lists->list[index][0];
+1268   3                  op = lists->list[index][1];
+1269   3                  //地址是变量，以变量的值为目的地址
+1270   3                  misc_op = TYPEVAR;
+1271   3                  if (op == TYPEVAR)
+1272   3                  {
+1273   4                      address = varLists->var_value[var_name];
+1274   4                      index += 2;
+1275   4                  }
+1276   3                  //地址是常数，以常数为目的地址
+1277   3                  misc_op = CONST_INT;
+1278   3                  if (op == CONST_INT)
+1279   3                  {
+1280   4                      address = var_name;
+1281   4                      index += 2;
+1282   4                  }
+1283   3      
+1284   3                  //写入mem
+1285   3                  if (address >= MEM_SIZE)
+1286   3                  {
+1287   4                      printf("mem read out of range\n");
+1288   4                  }
+1289   3                  mem[address] = num;
+1290   3              }
+1291   2      
+1292   2              index += 1;
+1293   2          }
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 22  
+
+1294   1      }
+1295          
+1296          u32 err_handle(u8 err, char *code_str, int index)
+1297          {
+1298   1          printf("\n");
+1299   1          switch(err)
+1300   1          {
+1301   2          case 1:
+1302   2              printf("list out of index\n");
+1303   2              break;
+1304   2          case 2:
+1305   2              printf("num too big\n");
+1306   2              break;
+1307   2          case 3:
+1308   2              printf("name too long\n");
+1309   2              break;
+1310   2          case 4:
+1311   2              printf("too many vars\n");
+1312   2              break;
+1313   2          case 5:
+1314   2              printf("unrecognized var\n");
+1315   2              break;
+1316   2          case 6:
+1317   2              printf("unrecognized word\n");
+1318   2              break;
+1319   2          case 7:
+1320   2              printf("can't find endif\n");
+1321   2              break;
+1322   2          case 8:
+1323   2              printf("can't find endwh\n");
+1324   2              break;
+1325   2          case 9:
+1326   2              printf("can't find while\n");
+1327   2              break;
+1328   2          case 10:
+1329   2              printf("func name too big\n");
+1330   2              break;
+1331   2          case 11:
+1332   2              printf("func name should be num\n");
+1333   2              break;
+1334   2          case 12:
+1335   2              printf("no   func\n");
+1336   2              break;
+1337   2          case 13:
+1338   2              printf("should be \"=\"\n");
+1339   2              break;
+1340   2          case 14:
+1341   2              printf("func no ret\"=\"\n");
+1342   2              break;
+1343   2          }
+1344   1      
+1345   1          printf("err char:%c at ", code_str[index]);
+1346   1          pr_n15_char(code_str, index-1);
+1347   1      
+1348   1          return index;
+1349   1      }
+1350          
+1351          u32 expr_err(LIST *lists, VARLISTS *varLists, u8 err, int index)
+1352          {
+1353   1          u32 start, end;
+1354   1      
+1355   1          printf("expr err:\n");
+C51 COMPILER V7.06   BASIC                                                                 08/12/2024 09:23:58 PAGE 23  
+
+1356   1          switch(err)
+1357   1          {
+1358   2          case 0:
+1359   2              printf("too many \"(\"\n");
+1360   2              break;
+1361   2          case 1:
+1362   2              printf("\")\" and \"(\" don't match\n");
+1363   2              break;
+1364   2          case 2:
+1365   2              printf("unrecognized op\n");
+1366   2              break;
+1367   2          case 3:
+1368   2              printf("op no const\n");
+1369   2              break;
+1370   2          case 4:
+1371   2              printf("value too big\n");
+1372   2              break;
+1373   2          }
+1374   1      
+1375   1          printf("at:\n");
+1376   1      
+1377   1          if (index - 3 > 0)
+1378   1          {
+1379   2              start = index - 3;
+1380   2          }
+1381   1          else
+1382   1          {
+1383   2              start = 0;
+1384   2          }
+1385   1      
+1386   1          if (index + 4 < lists->index)
+1387   1          {
+1388   2              end = index + 4;
+1389   2          }
+1390   1          else
+1391   1          {
+1392   2              end = lists->index;
+1393   2          }
+1394   1      
+1395   1          pri_parser(lists, varLists, start, end);
+1396   1      
+1397   1          return 1;
+1398   1      }
+1399          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =  11830    ----
+   CONSTANT SIZE    =    900    ----
+   XDATA SIZE       =   ----     444
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

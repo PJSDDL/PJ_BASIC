@@ -1,0 +1,178 @@
+C51 COMPILER V7.06   MAIN                                                                  08/12/2024 09:23:58 PAGE 1   
+
+
+C51 COMPILER V7.06, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\m
+                    -ain.lst) OBJECT(.\Objects\main.obj)
+
+stmt level    source
+
+   1          #include "BASIC.h"
+   2          #include "STC8.H"
+   3          #include <stdio.h>
+   4          #include <string.h>
+   5          
+   6          char basic_prog[] = "\
+   7          pri \"expr_test:\"\n\
+   8          var i\n\
+   9          i = 9230\n\
+  10          i = 2 < 1 \n\
+  11          i = i * i \n\
+  12          i = i + 2 * ( 1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) )\n\
+  13          pri i\n\
+  14          pri \"test_end:\"\n\
+  15          pri \"if_test:\"\n\
+  16          if i > 2\n\
+  17              pri \"big\"\n\
+  18          endif \n\
+  19          if i < 2\n\
+  20              pri \"smal\"\n\
+  21              if i \n\
+  22                  pri \"inner_if\"\n\
+  23              endif \n\
+  24              pri \"inner_endif\"\n\
+  25          endif \n\
+  26          pri \"test_end:\"\n\
+  27          pri \"while_test:\"\n\
+  28          while i < 2 \n\
+  29              pri \"small\"\n\
+  30              while 1\n\
+  31              endwh \n\
+  32              pri \"inner_endwh\"\n\
+  33          endwh \n\
+  34          while i > 2 \n\
+  35              pri i \n\
+  36              i = i - 1 \n\
+  37          endwh \n\
+  38          pri \"prim\"\n\
+  39          var b \n\
+  40          var div \n\
+  41          var flag \n\
+  42          b = 2 \n\
+  43          div = 2 \n\
+  44          flag = 0 \n\
+  45          while b < 10000 \n\
+  46              flag = 1 \n\
+  47              div = 2 \n\
+  48              while div < b / 2 + 1 \n\
+  49                  if ( b / div ) * div == b \n\
+  50                  flag = 0 \n\
+  51                  endif \n\
+  52                  div = div + 1\n\
+  53              endwh \n\
+  54              if flag \n\
+C51 COMPILER V7.06   MAIN                                                                  08/12/2024 09:23:58 PAGE 2   
+
+  55              pri b \n\
+  56              endif \n\
+  57              b = b + 1 \n\
+  58          endwh \n\
+  59          pri \"prim_end\"\n\
+  60          \0\
+  61          ";
+  62          
+  63          void UartInit(void)             //19200bps@24.000MHz
+  64          {
+  65   1          PCON &= 0x7F;               //波特率不倍速
+  66   1          SCON = 0x50;                //8位数据,可变波特率
+  67   1          AUXR |= 0x40;               //定时器时钟1T模式
+  68   1          AUXR &= 0xFE;               //串口1选择定时器1为波特率发生器
+  69   1          TMOD &= 0x0F;               //设置定时器模式
+  70   1          TMOD |= 0x20;               //设置定时器模式
+  71   1          TL1 = 0xD9;         //设置定时初始值
+  72   1          TH1 = 0xD9;         //设置定时重载值
+  73   1          ET1 = 0;            //禁止定时器%d中断
+  74   1          TR1 = 1;            //定时器1开始计时
+  75   1      
+  76   1          TI = 1;
+  77   1      }
+  78          
+  79          char putchar(char c)
+  80          {
+  81   1          SBUF = c;
+  82   1          while(!TI);
+  83   1          TI = 0;
+  84   1              
+  85   1              return c;
+  86   1      }
+  87          
+  88          LIST lists;
+  89          VARLISTS varLists;
+  90          int mem[MEM_SIZE];
+  91          u8 RxTemp;
+  92          u8 volatile RxStop = 0;
+  93          u32 RxCount = 0;
+  94          char RxBuf[2048];
+  95          /* USER CODE END 0 */
+  96          
+  97          int main(void)
+  98          {
+  99   1          int b=2, div=2, flag=0;
+ 100   1          RxTemp = 0;
+ 101   1          RxStop = 0;
+ 102   1          RxCount = 0;
+ 103   1              
+ 104   1              UartInit();
+ 105   1      
+ 106   1          while (b < 100)
+ 107   1          {
+ 108   2              flag = 1;
+ 109   2              div = 2;
+ 110   2              while (div < b/2 + 1)
+ 111   2              {
+ 112   3                  if ((b/div) * div == b)
+ 113   3                  {
+ 114   4                      flag = 0;
+ 115   4                  }
+ 116   3                  div++;
+C51 COMPILER V7.06   MAIN                                                                  08/12/2024 09:23:58 PAGE 3   
+
+ 117   3              }
+ 118   2      
+ 119   2              if (flag)
+ 120   2              {
+ 121   3                  printf("%d ", b);
+ 122   3              }
+ 123   2      
+ 124   2              b++;
+ 125   2          }
+ 126   1      
+ 127   1          while (1)
+ 128   1          {
+ 129   2              printf("HELLOW\r\n");
+ 130   2      
+ 131   2              //if(RxStop == 1)
+ 132   2              {
+ 133   3                  RxStop = 0;
+ 134   3      
+ 135   3                  printf("%s\n", basic_prog);
+ 136   3                  printf("code_len: %d\n", strlen(basic_prog));
+ 137   3                  parser(basic_prog, &lists, &varLists);
+ 138   3                  index_match(basic_prog, &lists);
+ 139   3                  //pri_var(&varLists);
+ 140   3                  //list_print(&lists);
+ 141   3                  pri_parser(&lists, &varLists, 0, lists.index);
+ 142   3                  printf("\n-----BASIC RUN-----\n");
+ 143   3                  basic_run(&lists, &varLists, mem);
+ 144   3      
+ 145   3              }
+ 146   2                      
+ 147   2                      while (1);
+ 148   2          }
+ 149   1          
+ 150   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    477    ----
+   CONSTANT SIZE    =     53    ----
+   XDATA SIZE       =   7257       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
