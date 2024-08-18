@@ -9,7 +9,7 @@ void list_init(LIST *lists)
     lists->MAX_LEN = LIST_LEN;
 }
 
-//ÏòÁĞ±íµÚÒ»ÁĞÄ©Î²Ìí¼Óa£¬ÏòµÚ¶şÁĞÄ©Î²Ìí¼Ób
+//å‘åˆ—è¡¨ç¬¬ä¸€åˆ—æœ«å°¾æ·»åŠ aï¼Œå‘ç¬¬äºŒåˆ—æœ«å°¾æ·»åŠ b
 void list_append(LIST *lists, u32 a, u32 b)
 {
     lists->list[lists->index][0] = a;
@@ -22,7 +22,7 @@ void list_append(LIST *lists, u32 a, u32 b)
     }
 }
 
-//ÏòÁĞ±íµÚÒ»ÁĞÄ©Î²Ìí¼Óa£¬ÏòµÚ¶şÁĞÄ©Î²Ìí¼Ób
+//å‘åˆ—è¡¨ç¬¬ä¸€åˆ—æœ«å°¾æ·»åŠ aï¼Œå‘ç¬¬äºŒåˆ—æœ«å°¾æ·»åŠ b
 void expr_list_append(EXPR_LIST *lists, u32 a, u32 b)
 {
     lists->list[lists->index][0] = a;
@@ -35,7 +35,7 @@ void expr_list_append(EXPR_LIST *lists, u32 a, u32 b)
     }
 }
 
-//É¾³ıÁĞ±íµÚaĞĞµÄÁ½¸öÊı
+//åˆ é™¤åˆ—è¡¨ç¬¬aè¡Œçš„ä¸¤ä¸ªæ•°
 void expr_list_pop(EXPR_LIST *lists, u32 a)
 {
     if (lists->index == 0)
@@ -52,7 +52,7 @@ void expr_list_pop(EXPR_LIST *lists, u32 a)
     lists->index--;
 }
 
-//´òÓ¡list
+//æ‰“å°list
 void list_print(LIST *lists)
 {
     printf("\n");
@@ -66,7 +66,7 @@ void list_print(LIST *lists)
     printf("\n");
 }
 
-//ÅĞ¶Ï×Ö·û´®AµÄindex´¦ÊÇ·ñÒÔ×Ö·û´®B¿ªÍ·
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„æ˜¯å¦ä»¥å­—ç¬¦ä¸²Bå¼€å¤´
 u8 str_eq(char *A, u32 index, char *B)
 {
     u8 flag = 1;
@@ -84,8 +84,8 @@ u8 str_eq(char *A, u32 index, char *B)
     return flag;
 }
 
-//ÅĞ¶Ï×Ö·û´®AµÄindex´¦£¬ÊÇ·ñÓĞ¹Ø¼ü×Ö
-//Èç¹ûÓĞ¹Ø¼ü×Ö£¬index×ÔÔöÒÔÌø¹ı¹Ø¼ü´Ê
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„ï¼Œæ˜¯å¦æœ‰å…³é”®å­—
+//å¦‚æœæœ‰å…³é”®å­—ï¼Œindexè‡ªå¢ä»¥è·³è¿‡å…³é”®è¯
 int key_in(char *A, u32 *index)
 {
     //enum KEY {NL, DOT, PRI, IF, ENDIF, WHILE, ENDWH, SPACE, VAR, FUNC, CALL, RET, RE, WR};
@@ -168,8 +168,8 @@ int key_in(char *A, u32 *index)
     return -1;
 }
 
-//ÅĞ¶Ï×Ö·û´®AµÄindex´¦£¬ÊÇ·ñÓĞÔËËã·û
-//Èç¹ûÓĞÔËËã·û£¬index×ÔÔöÒÔÌø¹ı¹Ø¼ü´Ê
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„ï¼Œæ˜¯å¦æœ‰è¿ç®—ç¬¦
+//å¦‚æœæœ‰è¿ç®—ç¬¦ï¼Œindexè‡ªå¢ä»¥è·³è¿‡å…³é”®è¯
 int op_in(char *A, u32 *index)
 {
     //enum OPS {EQ = 80, ADD, MIN, MUX, DIV, LB, RB, BIGER, SMALLER, IFEQ};
@@ -227,15 +227,15 @@ int op_in(char *A, u32 *index)
     return -1;
 }
 
-//ÅĞ¶Ï×Ö·û´®AµÄindex´¦£¬ÊÇ·ñÓĞÆäËû·ûºÅ
-//Èç¹ûÓĞ£¬index×ÔÔöÒÔÌø¹ı¹Ø¼ü´Ê£¬²¢½«ÕâĞ©·ûºÅ´æÈëcode_list
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„ï¼Œæ˜¯å¦æœ‰å…¶ä»–ç¬¦å·
+//å¦‚æœæœ‰ï¼Œindexè‡ªå¢ä»¥è·³è¿‡å…³é”®è¯ï¼Œå¹¶å°†è¿™äº›ç¬¦å·å­˜å…¥code_list
 int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
 {
     //enum MISC {TYPEVAR = 160, CONST_INT, STR};
-    //ÒÔ0~9¿ªÍ·µÄ·ûºÅÎªÊı×Ö
+    //ä»¥0~9å¼€å¤´çš„ç¬¦å·ä¸ºæ•°å­—
     if ((A[*index] >= 48) & (A[*index] <= 57))
     {
-        //¼ÆËãÊı×ÖÖµ
+        //è®¡ç®—æ•°å­—å€¼
         long long num = A[*index] - 48;
         *index += 1;
 
@@ -254,7 +254,7 @@ int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
 
         return 161;
     }
-    //ÒÔ"¿ªÍ·µÄ·ûºÅÎª×Ö·û´®
+    //ä»¥"å¼€å¤´çš„ç¬¦å·ä¸ºå­—ç¬¦ä¸²
     else if (A[*index] == '"')
     {
         *index += 1;
@@ -267,7 +267,7 @@ int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
 
         return 162;
     }
-    //½«±äÁ¿Ìæ»»Îª´úºÅ
+    //å°†å˜é‡æ›¿æ¢ä¸ºä»£å·
     else
     {
         int var_index = var_name_in(A, varLists, index);
@@ -283,14 +283,14 @@ int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
     return -1;
 }
 
-//»ñµÃ±äÁ¿µÄÃû×Ö
+//è·å¾—å˜é‡çš„åå­—
 void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
 {
     do
     {
         *index += 1;
     }
-    while(code_str[*index] == ' ');  //Ìø¹ı¿Õ¸ñ
+    while(code_str[*index] == ' ');  //è·³è¿‡ç©ºæ ¼
 
     u8 str_index = 0;
 
@@ -304,7 +304,7 @@ void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
             err_handle(3, code_str, *index);
         }
     }
-    while((code_str[*index] != ' ') & (code_str[*index] != '\n'));  //¶ÁÈ¡×Ö·ûÖ±µ½ÓĞ¿Õ¸ñ»ò»»ĞĞ
+    while((code_str[*index] != ' ') & (code_str[*index] != '\n'));  //è¯»å–å­—ç¬¦ç›´åˆ°æœ‰ç©ºæ ¼æˆ–æ¢è¡Œ
     varLists->var_name[varLists->var_num][str_index] = '\0';
     *index += 1;
     varLists->var_num += 1;
@@ -315,7 +315,7 @@ void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
     }
 }
 
-//¼ì²é´ÊÓïÊÇ·ñÊÇ±äÁ¿£¬ÈôÊÇÔò»ñµÃ±äÁ¿±àºÅ
+//æ£€æŸ¥è¯è¯­æ˜¯å¦æ˜¯å˜é‡ï¼Œè‹¥æ˜¯åˆ™è·å¾—å˜é‡ç¼–å·
 int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
 {
     u8 str_index = 0;
@@ -326,7 +326,7 @@ int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
         return -1;
     }
 
-    while(code_str[str_index + *index] != ' ')  //¶ÁÈ¡×Ö·ûÖ±µ½ÓĞ¿Õ¸ñ
+    while(code_str[str_index + *index] != ' ')  //è¯»å–å­—ç¬¦ç›´åˆ°æœ‰ç©ºæ ¼
     {
         str[str_index] = code_str[str_index + *index];
         str_index++;
@@ -341,13 +341,13 @@ int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
     u32 var_index = 0;
     while (1)
     {
-        //²éÕÒ±äÁ¿ÁĞ±íÖĞÊÇ·ñÓĞ¸Ã±äÁ¿
+        //æŸ¥æ‰¾å˜é‡åˆ—è¡¨ä¸­æ˜¯å¦æœ‰è¯¥å˜é‡
         if (var_index >= varLists->var_num)
         {
             return -1;
         }
 
-        if (str_eq(str, 0, varLists->var_name[var_index]))
+        if (strcmp(str, varLists->var_name[var_index]) == 0)
         {
             return var_index;
         }
@@ -355,7 +355,7 @@ int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
     }
 }
 
-//´òÓ¡±äÁ¿ĞÅÏ¢
+//æ‰“å°å˜é‡ä¿¡æ¯
 void pri_var(VARLISTS *varLists)
 {
     printf("\n");
@@ -366,7 +366,7 @@ void pri_var(VARLISTS *varLists)
     printf("\n");
 }
 
-//¼ÆËãÒ»ĞĞ´úÂëÖĞ£¬×îºóÒ»¸öÔªËØµÄindex
+//è®¡ç®—ä¸€è¡Œä»£ç ä¸­ï¼Œæœ€åä¸€ä¸ªå…ƒç´ çš„index
 u32 find_end_index(LIST *lists, u32 start)
 {
     for (u32 expr_end_index = start; ; expr_end_index++)
@@ -379,7 +379,7 @@ u32 find_end_index(LIST *lists, u32 start)
     }
 }
 
-//´òÓ¡×Ö·û´®indexºóµÄ15¸ö×Ö·û
+//æ‰“å°å­—ç¬¦ä¸²indexåçš„15ä¸ªå­—ç¬¦
 void pr_n15_char(char *code_str, u32 index)
 {
     u8 ind = 0;
@@ -396,14 +396,14 @@ void pr_n15_char(char *code_str, u32 index)
     printf("\n");
 }
 
-//·Ö´ÊÆ÷
+//åˆ†è¯å™¨
 void parser(char *code_str, LIST *lists, VARLISTS *varLists)
 {
     u32 max_index = strlen(code_str);
     u32 index = 0;
     u32 line_num = 0;
 
-    //³õÊ¼»¯´úÂëĞòÁĞ
+    //åˆå§‹åŒ–ä»£ç åºåˆ—
     list_init(lists);
     varLists->var_num = 0;
 
@@ -411,15 +411,15 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
     {
         //pr_n15_char(code_str, index);
 
-        //Ê¶±ğ¹Ø¼ü×Ö
+        //è¯†åˆ«å…³é”®å­—
         int key_in_num = key_in(code_str, &index);
         if (key_in_num >= 0)
         {
-            if (key_in_num == 7)  //Ìø¹ı¿Õ¸ñ
+            if (key_in_num == 7)  //è·³è¿‡ç©ºæ ¼
             {
                 continue;
             }
-            else if (key_in_num == 8)  //¶¨ÒåĞÂ±äÁ¿
+            else if (key_in_num == 8)  //å®šä¹‰æ–°å˜é‡
             {
                 get_var_name(code_str, varLists, &index);
                 continue;
@@ -430,7 +430,7 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
             continue;
         }
 
-        //Ê¶±ğ²Ù×÷·û
+        //è¯†åˆ«æ“ä½œç¬¦
         int op_in_num = op_in(code_str, &index);
         if (op_in_num > 0)
         {
@@ -438,7 +438,7 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
             continue;
         }
 
-        //Ê¶±ğÆäËûÀàĞÍ±êÊ¶·û
+        //è¯†åˆ«å…¶ä»–ç±»å‹æ ‡è¯†ç¬¦
         int miscop_in_num = miscop_in(code_str, &index, lists, varLists);
         if (miscop_in_num > 0)
         {
@@ -446,7 +446,7 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
         }
 
         index += 1;
-        //´úÂë¶ÁÍê
+        //ä»£ç è¯»å®Œ
         if (index >= max_index)
         {
             break;
@@ -457,8 +457,8 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
     }
 }
 
-//¼ÆËã¶ÔÓ¦·ûºÅµÄÎ»ÖÃ
-//if¶ÔÓ¦endif while¶ÔÓ¦endwh endwh¶ÔÓ¦while   call add¶ÔÓ¦ func add
+//è®¡ç®—å¯¹åº”ç¬¦å·çš„ä½ç½®
+//ifå¯¹åº”endif whileå¯¹åº”endwh endwhå¯¹åº”while   call addå¯¹åº” func add
 void index_match(char *code_str, LIST *lists)
 {
     u32 index = 0;
@@ -472,13 +472,13 @@ void index_match(char *code_str, LIST *lists)
         keywords = IF;
         if (lists->list[index][1] == keywords)
         {
-            //´¦ÀíifµÄ¶ÔÓ¦·ûºÅ
+            //å¤„ç†ifçš„å¯¹åº”ç¬¦å·
             index_ = index;
             while(1)
             {
                 index_ += 1;
 
-                //´¦ÀíifÇ¶Ì×
+                //å¤„ç†ifåµŒå¥—
                 keywords = IF;
                 if (lists->list[index_][1] == keywords)
                 {
@@ -493,7 +493,7 @@ void index_match(char *code_str, LIST *lists)
                 }
                 else if ((lists->list[index_][1] == keywords) & (keycount == 0))
                 {
-                    //±£´æif¶ÔÓ¦µÄendifµÄindex
+                    //ä¿å­˜ifå¯¹åº”çš„endifçš„index
                     lists->list[index][0] = index_;
                     //print(index_)
                     break;
@@ -509,13 +509,13 @@ void index_match(char *code_str, LIST *lists)
         keywords = WHILE;
         if (lists->list[index][1] == keywords)
         {
-            //´¦ÀíwhileµÄ¶ÔÓ¦·ûºÅ
+            //å¤„ç†whileçš„å¯¹åº”ç¬¦å·
             index_ = index;
             while(1)
             {
                 index_ += 1;
 
-                //´¦ÀíwhileÇ¶Ì×
+                //å¤„ç†whileåµŒå¥—
                 keywords = WHILE;
                 if (lists->list[index_][1] == keywords)
                 {
@@ -530,7 +530,7 @@ void index_match(char *code_str, LIST *lists)
                 }
                 else if ((lists->list[index_][1] == keywords) & (keycount == 0))
                 {
-                    //±£´æwhile¶ÔÓ¦µÄendifµÄindex
+                    //ä¿å­˜whileå¯¹åº”çš„endifçš„index
                     lists->list[index][0] = index_ + 1;
                     //print(index_)
                     break;
@@ -546,13 +546,13 @@ void index_match(char *code_str, LIST *lists)
         keywords = ENDWH;
         if (lists->list[index][1] == keywords)
         {
-            //´¦ÀíendwhµÄ¶ÔÓ¦·ûºÅ
+            //å¤„ç†endwhçš„å¯¹åº”ç¬¦å·
             index_ = index;
             while(1)
             {
                 index_ -= 1;
 
-                //´¦ÀíendwhÇ¶Ì×
+                //å¤„ç†endwhåµŒå¥—
                 keywords = ENDWH;
                 if (lists->list[index_][1] == keywords)
                 {
@@ -567,7 +567,7 @@ void index_match(char *code_str, LIST *lists)
                 }
                 else if ((lists->list[index_][1] == keywords) & (keycount == 0))
                 {
-                    //±£´æif¶ÔÓ¦µÄendifµÄindex
+                    //ä¿å­˜ifå¯¹åº”çš„endifçš„index
                     lists->list[index][0] = index_ - 1;
                     //print(index_)
                     break;
@@ -583,11 +583,11 @@ void index_match(char *code_str, LIST *lists)
         keywords = CALL;
         if (lists->list[index][1] == keywords)
         {
-            //´¦ÀícallµÄ¶ÔÓ¦·ûºÅ
+            //å¤„ç†callçš„å¯¹åº”ç¬¦å·
             u32 func_name = lists->list[index+1][0];
 
             keywords = FUNC;
-            //±éÀú´úÂë£¬Ñ°ÕÒ¶ÔÓ¦µÄfunc
+            //éå†ä»£ç ï¼Œå¯»æ‰¾å¯¹åº”çš„func
             for (u32 i = 0; ; i++)
             {
                 if (lists->list[i][1] == keywords)
@@ -617,7 +617,7 @@ void index_match(char *code_str, LIST *lists)
         keywords = FUNC;
         if (lists->list[index][1] == keywords)
         {
-            //´¦ÀífuncµÄ¶ÔÓ¦·ûºÅ
+            //å¤„ç†funcçš„å¯¹åº”ç¬¦å·
             index_ = index;
             while(1)
             {
@@ -631,7 +631,7 @@ void index_match(char *code_str, LIST *lists)
                 }
                 else if ((lists->list[index_][1] == keywords))
                 {
-                    //±£´æfunc¶ÔÓ¦µÄretµÄindex
+                    //ä¿å­˜funcå¯¹åº”çš„retçš„index
                     lists->list[index][0] = index_ + 1;
                     //print(index_)
                     break;
@@ -647,17 +647,17 @@ void index_match(char *code_str, LIST *lists)
     }
 }
 
-//±í´ïÊ½¼ÆËãÆ÷
+//è¡¨è¾¾å¼è®¡ç®—å™¨
 int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
 {
     enum OPS ops, ops2, ops3;
     enum MISC misc_op, misc_op2;
 
-    //±ê×¢ÓÅÏÈ¼¶
-    EXPR_LIST expr_list;   //´´½¨LIST±£´æ¶ÔÓ¦µÄ·ûºÅÓÅÏÈ¼¶
+    //æ ‡æ³¨ä¼˜å…ˆçº§
+    EXPR_LIST expr_list;   //åˆ›å»ºLISTä¿å­˜å¯¹åº”çš„ç¬¦å·ä¼˜å…ˆçº§
     expr_list.index = 0;
     expr_list.MAX_LEN = MAX_EXPR_LEN;
-    char bracket_num = 0;   //¼ÇÂ¼Ğ¡À¨ºÅÊıÁ¿
+    char bracket_num = 0;   //è®°å½•å°æ‹¬å·æ•°é‡
 
     for (u32 i = expr_start; i < expr_end; i++)
     {
@@ -667,7 +667,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
         if (op == ops)
         {
             bracket_num += 5;
-            if (bracket_num > 120)  //Ğ¡À¨ºÅ×î¶àÇ¶Ì×14²ã
+            if (bracket_num > 120)  //å°æ‹¬å·æœ€å¤šåµŒå¥—14å±‚
             {
                 expr_err(lists, varLists, 0, i);
             }
@@ -689,7 +689,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
         ops = BIGER;
         ops2 = SMALLER;
         ops3 = IFEQ;
-        //±È½ÏÔËËãÓÅÏÈ¼¶Îª1 + 5 * À¨ºÅÊı
+        //æ¯”è¾ƒè¿ç®—ä¼˜å…ˆçº§ä¸º1 + 5 * æ‹¬å·æ•°
         if ((op == ops)|(op == ops2)|(op == ops3))
         {
             expr_list_append(&expr_list, op, 1 + bracket_num);
@@ -698,7 +698,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
 
         ops = ADD;
         ops2 = MINUS;
-        //¼Ó·¨ÓÅÏÈ¼¶Îª2 + 5 * À¨ºÅÊı
+        //åŠ æ³•ä¼˜å…ˆçº§ä¸º2 + 5 * æ‹¬å·æ•°
         if ((op == ops)|(op == ops2))
         {
             expr_list_append(&expr_list, op, 2 + bracket_num);
@@ -707,7 +707,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
 
         ops = MUX;
         ops2 = DIV;
-        //³Ë·¨ÓÅÏÈ¼¶Îª3 + 5 * À¨ºÅÊı
+        //ä¹˜æ³•ä¼˜å…ˆçº§ä¸º3 + 5 * æ‹¬å·æ•°
         if ((op == ops)|(op == ops2))
         {
             expr_list_append(&expr_list, op, 3 + bracket_num);
@@ -715,7 +715,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
         }
 
         misc_op = CONST_INT;
-        //³£ÊıÓÅÏÈ¼¶Îª0
+        //å¸¸æ•°ä¼˜å…ˆçº§ä¸º0
         if (misc_op == op)
         {
             u32 var_name = lists->list[i][0];
@@ -724,7 +724,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
         }
 
         misc_op = TYPEVAR;
-        //±äÁ¿ÓÅÏÈ¼¶Îª0
+        //å˜é‡ä¼˜å…ˆçº§ä¸º0
         if (misc_op == op)
         {
             u32 var_name = lists->list[i][0];
@@ -754,7 +754,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
 
         while(1)
         {
-            //Ñ°ÕÒµ±Ç°ÓÅÏÈ¼¶¶ÔÓ¦µÄÔËËã£¬ÓÅÏÈ¼ÆËã¸ßÓÅÏÈ¼¶
+            //å¯»æ‰¾å½“å‰ä¼˜å…ˆçº§å¯¹åº”çš„è¿ç®—ï¼Œä¼˜å…ˆè®¡ç®—é«˜ä¼˜å…ˆçº§
             index = 0;
             for (u32 ind = 0; ind < expr_list.index; ind++)
             {
@@ -765,13 +765,13 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
                 index += 1;
             }
 
-            //µ±Ç°ÓÅÏÈ¼¶ÎŞ¶ÔÓ¦ÔËËã·û
+            //å½“å‰ä¼˜å…ˆçº§æ— å¯¹åº”è¿ç®—ç¬¦
             if (index == expr_list.index)
             {
                 break;
             }
 
-            //´òÓ¡¼ÆËã¹ı³Ì
+            //æ‰“å°è®¡ç®—è¿‡ç¨‹
             /*
             printf("\n");
             for (u8 i = 0; i < expr_list.index; i++)
@@ -783,23 +783,23 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
             */
 
             int num_A;
-            if (index == 0)     //ÔËËã·û³öÏÖÔÚ±í´ïÊ½¿ªÍ·
+            if (index == 0)     //è¿ç®—ç¬¦å‡ºç°åœ¨è¡¨è¾¾å¼å¼€å¤´
             {
                 num_A = 0;
                 expr_err(lists, varLists, 3, index);
             }
-            else      //±äÁ¿Óë³£Á¿
+            else      //å˜é‡ä¸å¸¸é‡
             {
                 num_A = (int)expr_list.list[index - 1][0];
             }
 
             int num_B;
-            if (index == expr_list.index - 1)     //ÔËËã·û³öÏÖÔÚ±í´ïÊ½½áÎ²
+            if (index == expr_list.index - 1)     //è¿ç®—ç¬¦å‡ºç°åœ¨è¡¨è¾¾å¼ç»“å°¾
             {
                 num_B = 0;
                 expr_err(lists, varLists, 3, index);
             }
-            else      //±äÁ¿Óë³£Á¿
+            else      //å˜é‡ä¸å¸¸é‡
             {
                 num_B = (int)expr_list.list[index + 1][0];
             }
@@ -808,19 +808,19 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
 
             u8 op = expr_list.list[index][0];
             //enum OPS {EQ = 80, ADD, MINUS, MUX, DIV, LB, RB, BIGER, SMALLER, IFEQ};
-            if (op == 83)   //³Ë
+            if (op == 83)   //ä¹˜
             {
                 expr_value = num_A * num_B;
             }
-            else if (op == 84)  //³ı
+            else if (op == 84)  //é™¤
             {
                 expr_value = num_A / num_B;
             }
-            else if (op == 81)  //¼Ó
+            else if (op == 81)  //åŠ 
             {
                 expr_value = num_A + num_B;
             }
-            else if (op == 82)  //¼õ
+            else if (op == 82)  //å‡
             {
                 expr_value = num_A - num_B;
             }
@@ -842,7 +842,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
                 expr_err(lists, varLists, 4, index);
             }
 
-            //ÔËËã·ûÓë±í´ïÊ½Ìæ»»Îª½á¹û
+            //è¿ç®—ç¬¦ä¸è¡¨è¾¾å¼æ›¿æ¢ä¸ºç»“æœ
             expr_list_pop(&expr_list, index-1);
             expr_list_pop(&expr_list, index-1);
             expr_list.list[index-1][0] = (int)expr_value;
@@ -853,7 +853,7 @@ int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end)
     return expr_list.list[0][0];
 }
 
-//´òÓ¡·Ö´ÊºóµÄ½á¹û
+//æ‰“å°åˆ†è¯åçš„ç»“æœ
 void pri_parser(LIST *lists, VARLISTS *varLists, u32 index_start, u32 index_end)
 {
     u32 ind;
@@ -1001,7 +1001,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
     u8 op;
     u32 num;
 
-    //º¯Êıµ÷ÓÃÕ»
+    //å‡½æ•°è°ƒç”¨æ ˆ
     u32 func_stack[MAX_FUN_STACK];
     u32 func_stack_index = 0;
 
@@ -1009,7 +1009,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
     {
         if (index >= lists->index)
         {
-            break;  //  ³ÌĞòÖ´ĞĞÍê
+            break;  //  ç¨‹åºæ‰§è¡Œå®Œ
         }
         op = lists->list[index][1];
         num = lists->list[index][0];   //printf("index: %d\n", index);
@@ -1022,7 +1022,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
         }
 
         keywords = PRI;
-        //priÖ¸Áî¿ÉÒÔ´òÓ¡ÕûÊı¡¢±äÁ¿¡¢×Ö·û´®£¬Ôİ²»Ö§³Ö±í´ïÊ½´òÓ¡
+        //priæŒ‡ä»¤å¯ä»¥æ‰“å°æ•´æ•°ã€å˜é‡ã€å­—ç¬¦ä¸²ï¼Œæš‚ä¸æ”¯æŒè¡¨è¾¾å¼æ‰“å°
         if (op == keywords)
         {
             while(1)
@@ -1034,21 +1034,21 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
                 misc_op = CONST_INT;
                 if (op == misc_op)
                 {
-                    printf("%d ", (int)num);     //´òÓ¡ÕûÊı
+                    printf("%d ", (int)num);     //æ‰“å°æ•´æ•°
                     continue;
                 }
 
                 misc_op = TYPEVAR;
                 if (op == TYPEVAR)
                 {
-                    printf("%d ", (int)varLists->var_value[num]);     //´òÓ¡±äÁ¿µÄÖµ
+                    printf("%d ", (int)varLists->var_value[num]);     //æ‰“å°å˜é‡çš„å€¼
                     continue;
                 }
 
                 misc_op = STR;
                 if (op == misc_op)
                 {
-                    printf("%c", num);     //´òÓ¡×Ö·û
+                    printf("%c", num);     //æ‰“å°å­—ç¬¦
                     continue;
                 }
 
@@ -1064,10 +1064,10 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
         }
 
         misc_op = TYPEVAR;
-        //ÒÔ±äÁ¿¿ªÍ·µÄÓï¾äÎª¸³ÖµÓï¾ä
+        //ä»¥å˜é‡å¼€å¤´çš„è¯­å¥ä¸ºèµ‹å€¼è¯­å¥
         if (op == misc_op)
         {
-            //Ñ°ÕÒ¸³ÖµÓï¾ä½áÎ²
+            //å¯»æ‰¾èµ‹å€¼è¯­å¥ç»“å°¾
             u32 expr_end_index = find_end_index(lists, index+2);
 
             int value = expr(varLists, lists, index + 2, expr_end_index);
@@ -1078,10 +1078,10 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
                 printf("\nindex:%d err: should be \"=\" \n", index);
             }
 
-            //¸³Öµ
+            //èµ‹å€¼
             varLists->var_value[num] = value;
 
-            //±í´ïÊ½¶ÁÍê£¬Ìø¹ıindex
+            //è¡¨è¾¾å¼è¯»å®Œï¼Œè·³è¿‡index
             index = expr_end_index + 1;
 
             continue;
@@ -1096,7 +1096,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
 
             if (value == 1)
             {
-                //±í´ïÊ½¶ÁÍê£¬Ìø¹ıindex£¬Ö´ĞĞÏÂÒ»ÌõÓï¾ä
+                //è¡¨è¾¾å¼è¯»å®Œï¼Œè·³è¿‡indexï¼Œæ‰§è¡Œä¸‹ä¸€æ¡è¯­å¥
                 index = expr_end_index + 1;
             }
             else
@@ -1110,7 +1110,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
         keywords = ENDWH;
         if (op == keywords)
         {
-            //Ìøµ½while
+            //è·³åˆ°while
             index = num;
             continue;
         }
@@ -1124,7 +1124,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
 
             if (value == 1)
             {
-                //±í´ïÊ½¶ÁÍê£¬Ìø¹ıindex£¬Ö´ĞĞÏÂÒ»ÌõÓï¾ä
+                //è¡¨è¾¾å¼è¯»å®Œï¼Œè·³è¿‡indexï¼Œæ‰§è¡Œä¸‹ä¸€æ¡è¯­å¥
                 index = expr_end_index + 1;
             }
             else
@@ -1135,11 +1135,11 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
             continue;
         }
 
-        //º¯ÊıÖ»ÄÜÍ¨¹ıCALLµ÷ÓÃ£¬²»ÄÜÖ±½ÓÖ´ĞĞ
+        //å‡½æ•°åªèƒ½é€šè¿‡CALLè°ƒç”¨ï¼Œä¸èƒ½ç›´æ¥æ‰§è¡Œ
         keywords = FUNC;
         if (op == keywords)
         {
-            //Ìø×ª
+            //è·³è½¬
             index = num;
 
             continue;
@@ -1148,11 +1148,11 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
         keywords = CALL;
         if (op == keywords)
         {
-            //Ë÷ÒıÑ¹Õ»
+            //ç´¢å¼•å‹æ ˆ
             func_stack[func_stack_index] = index + 2;
             func_stack_index++;
 
-            //Ìø×ª
+            //è·³è½¬
             index = num;
 
             continue;
@@ -1161,7 +1161,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
         keywords = RET;
         if (op == keywords)
         {
-            //Ë÷Òı³öÕ»
+            //ç´¢å¼•å‡ºæ ˆ
 
             func_stack_index--;
             index = func_stack[func_stack_index];
@@ -1175,29 +1175,29 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
             u32 address;
             int num;
 
-            //»ñµÃ¶ÁÈ¡µØÖ·
+            //è·å¾—è¯»å–åœ°å€
             index += 2;
             address = lists->list[index][0];
             op = lists->list[index][1];
-            //ÈôÊÇ±äÁ¿£¬Ôò¶ÁÈ¡±äÁ¿Öµ
+            //è‹¥æ˜¯å˜é‡ï¼Œåˆ™è¯»å–å˜é‡å€¼
             misc_op = TYPEVAR;
             if (op == TYPEVAR)
             {
                 address = varLists->var_value[address];
             }
 
-            //¶ÁÈ¡mem
+            //è¯»å–mem
             if (address >= MEM_SIZE)
             {
                 printf("mem read out of range\n");
             }
             num = mem[address];
 
-            //¸³Öµ¸ø±äÁ¿»òÄÚ´æµØÖ·
+            //èµ‹å€¼ç»™å˜é‡æˆ–å†…å­˜åœ°å€
             index--;
             u32 var_name = lists->list[index][0];
             op = lists->list[index][1];
-            //²Ù×÷ÊıÊÇ±äÁ¿£¬½«¶ÁÈ¡½á¹û±£´æµ½±äÁ¿ÖĞ
+            //æ“ä½œæ•°æ˜¯å˜é‡ï¼Œå°†è¯»å–ç»“æœä¿å­˜åˆ°å˜é‡ä¸­
             misc_op = TYPEVAR;
             if (op == TYPEVAR)
             {
@@ -1205,7 +1205,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
                 index += 2;
                 continue;
             }
-            //²Ù×÷ÊıÊÇ³£Êı£¬½«¶ÁÈ¡½á¹û±£´æµ½memÊı×éÖĞ
+            //æ“ä½œæ•°æ˜¯å¸¸æ•°ï¼Œå°†è¯»å–ç»“æœä¿å­˜åˆ°memæ•°ç»„ä¸­
             misc_op = CONST_INT;
             if (op == CONST_INT)
             {
@@ -1221,29 +1221,29 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
             u32 address;
             int num;
 
-            //»ñµÃ²Ù×÷Êı
+            //è·å¾—æ“ä½œæ•°
             index += 2;
             num = lists->list[index][0];
             op = lists->list[index][1];
-            //ÈôÊÇ±äÁ¿£¬Ôò¶ÁÈ¡±äÁ¿Öµ
+            //è‹¥æ˜¯å˜é‡ï¼Œåˆ™è¯»å–å˜é‡å€¼
             misc_op = TYPEVAR;
             if (op == TYPEVAR)
             {
                 num = varLists->var_value[num];
             }
 
-            //»ñÈ¡Ğ´ÈëµØÖ·²¢Ğ´Èë
+            //è·å–å†™å…¥åœ°å€å¹¶å†™å…¥
             index--;
             u32 var_name = lists->list[index][0];
             op = lists->list[index][1];
-            //µØÖ·ÊÇ±äÁ¿£¬ÒÔ±äÁ¿µÄÖµÎªÄ¿µÄµØÖ·
+            //åœ°å€æ˜¯å˜é‡ï¼Œä»¥å˜é‡çš„å€¼ä¸ºç›®çš„åœ°å€
             misc_op = TYPEVAR;
             if (op == TYPEVAR)
             {
                 address = varLists->var_value[var_name];
                 index += 2;
             }
-            //µØÖ·ÊÇ³£Êı£¬ÒÔ³£ÊıÎªÄ¿µÄµØÖ·
+            //åœ°å€æ˜¯å¸¸æ•°ï¼Œä»¥å¸¸æ•°ä¸ºç›®çš„åœ°å€
             misc_op = CONST_INT;
             if (op == CONST_INT)
             {
@@ -1251,7 +1251,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
                 index += 2;
             }
 
-            //Ğ´Èëmem
+            //å†™å…¥mem
             if (address >= MEM_SIZE)
             {
                 printf("mem read out of range\n");
