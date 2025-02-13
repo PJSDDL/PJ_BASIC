@@ -8,11 +8,12 @@ char basic_prog[] = "\
 pri \"expr_test:\"\n\
 var i\n\
 i = 9230\n\
+pri i + 1 \n\
 i = 2 < 1 \n\
 i = i * i \n\
-i = i + 2 * ( 1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) )\n\
+i = i + 2 * (1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) )\n\
 pri i\n\
-pri \"test_end:\"\n\
+pri \"expr_test_end:\"\n\
 pri \"if_test:\"\n\
 if i > 2\n\
     pri \"big\"\n\
@@ -24,7 +25,7 @@ if i < 2\n\
     endif \n\
     pri \"inner_endif\"\n\
 endif \n\
-pri \"test_end:\"\n\
+pri \"if_test_end:\"\n\
 pri \"while_test:\"\n\
 while i < 2 \n\
     pri \"small\"\n\
@@ -32,36 +33,44 @@ while i < 2 \n\
     endwh \n\
     pri \"inner_endwh\"\n\
 endwh \n\
+pri \"while_test_end:\"\n\
 while i > 2 \n\
     pri i \n\
     i = i - 1 \n\
 endwh \n\
-pri \"prim\"\n\
+pri \"prim \"\n\
 var b \n\
 var div \n\
 var flag \n\
 b = 2 \n\
 div = 2 \n\
 flag = 0 \n\
-while b < 10000 \n\
+while b < 100 \n\
     flag = 1 \n\
     div = 2 \n\
     while div < b / 2 + 1 \n\
-        if ( b / div ) * div == b \n\
-        flag = 0 \n\
+        if int ( b / div ) * div == b \n\
+            flag = 0 \n\
         endif \n\
         div = div + 1\n\
     endwh \n\
     if flag \n\
-    pri b \n\
+    pri \"b:\", b, \"\n\" \n\
     endif \n\
     b = b + 1 \n\
 endwh \n\
 pri \"prim_end\"\n\
 ";
 
+
 /*
-//if-endif²âÊÔ
+char basic_prog[] = "\
+pri \"t: \" , 21.13 , 5 / 2 , int ( 5 / 2 ) \n\
+";
+*/
+
+/*
+//if-endifæµ‹è¯•
 char basic_prog[] = "\
 var flag \n\
 flag =  - 3 \n\
@@ -75,7 +84,7 @@ endif \n\
 */
 
 /*
-//while-endwh²âÊÔ
+//while-endwhæµ‹è¯•
 char basic_prog[] = "\
 var flag \n\
 flag = 11 \n\
@@ -86,7 +95,7 @@ endwh \n\
 */
 
 /*
-//×Óº¯Êý²âÊÔ
+//å­å‡½æ•°æµ‹è¯•
 char basic_prog[] = "\
 var i\n\
 i = 1\n\
@@ -102,6 +111,7 @@ ret \n\
 ";
 */
 
+//æ•°ç»„è¯»å†™æµ‹è¯•
 /*
 char basic_prog[] = "\
 var i\n\
@@ -123,9 +133,7 @@ int mem[MEM_SIZE];
 
 int main()
 {
-    printf(basic_prog);
-
-    //CÓïÑÔÖÊÊý¼ÆËã
+    //Cè¯­è¨€è´¨æ•°è®¡ç®—
     int b=2, div=2, flag=0;
     while (b < 10000)
     {
@@ -148,7 +156,7 @@ int main()
         b++;
     }
 
-    //·Ö´Ê²âÊÔ
+    //åˆ†è¯æµ‹è¯•
     u32 index = 0;
     printf("%d\n", key_in("if i > 10", &index));
     index = 12;
@@ -157,7 +165,7 @@ int main()
     printf("code_len: %d\n", strlen(basic_prog));
     parser(basic_prog, &lists, &varLists);
     index_match(basic_prog, &lists);
-    pri_var(&varLists);
+    //pri_var(&varLists);
     //list_print(&lists);
     //pri_parser(&lists, &varLists, 0, lists.index);
     printf("\n-----BASIC RUN-----\n");
