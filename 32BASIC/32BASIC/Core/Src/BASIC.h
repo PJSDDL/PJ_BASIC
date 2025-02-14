@@ -2,20 +2,20 @@
 #define u32 unsigned int
 #define LIST_LEN 500
 #define MAX_EXPR_LEN 40
-#define MAX_VAR_NUM  120
-#define MAX_VAR_LEN  15
+#define MAX_VAR_NUM  60
+#define MAX_VAR_LEN  6
 #define MAX_FUN_STACK 10
 #define MEM_SIZE 200
 
-//¹Ø¼ü×Ö¡¢ÔËËã·ûÓë·Ö¸ô·ûµÈ
-//¹Ø¼ü×ÖÃ¶¾Ù£º»»ÐÐ£¬¶ººÅ£¬pri£¬if£¬endif£¬while£¬endwh, " ", var£¬func£¬call£¬ret, read, write
+//å…³é”®å­—ã€è¿ç®—ç¬¦ä¸Žåˆ†éš”ç¬¦ç­‰
+//å…³é”®å­—æžšä¸¾ï¼šæ¢è¡Œï¼Œé€—å·ï¼Œpriï¼Œifï¼Œendifï¼Œwhileï¼Œendwh, " ", varï¼Œfuncï¼Œcallï¼Œret, read, write
 enum KEY {NL, DOT, PRI, IF, ENDIF, WHILE, ENDWH, SPACE, VAR, FUNC, CALL, RET, READ, WRITE};
-//ÔËËã·ûÃ¶¾Ù£º=£¬+£¬-£¬*£¬/£¬(£¬)£¬>£¬<£¬==
-enum OPS {EQ = 80, ADD, MINUS, MUX, DIV, LB, RB, BIGER, SMALLER, IFEQ};
-//ÆäËû±êÊ¶·ûºÅ
-enum MISC {TYPEVAR = 160, CONST_INT, STR};
+//è¿ç®—ç¬¦æžšä¸¾ï¼š=ï¼Œ+ï¼Œ-ï¼Œ*ï¼Œ/ï¼Œ(ï¼Œ), intï¼Œ>ï¼Œ<ï¼Œ==
+enum OPS {EQ = 80, ADD, MINUS, MUX, DIV, LB, RB, INT, BIGER, SMALLER, IFEQ, OPS_END};
+//å…¶ä»–æ ‡è¯†ç¬¦å·
+enum MISC {TYPEVAR = 160, CONST, STR};
 
-//Ò»¸öÁ½ÁÐNÐÐµÄLIST£¬Ä£ÄâPYTHONÖÐµÄLIST
+//ä¸€ä¸ªä¸¤åˆ—Nè¡Œçš„LISTï¼Œæ¨¡æ‹ŸPYTHONä¸­çš„LIST
 typedef struct lists
 {
     u32  list[LIST_LEN][2];
@@ -23,23 +23,23 @@ typedef struct lists
     u32  MAX_LEN;
 } LIST;
 
-//´æ´¢±í´ïÊ½
+//å­˜å‚¨è¡¨è¾¾å¼
 typedef struct expr_lists
 {
-    u32  list[MAX_EXPR_LEN][2];
+    float  list[MAX_EXPR_LEN][2];
     u32  index;
     u32  MAX_LEN;
 } EXPR_LIST;
 
-//±äÁ¿ÁÐ±í
+//å˜é‡åˆ—è¡¨
 typedef struct varLists
 {
     u8  var_name[MAX_VAR_NUM][MAX_VAR_LEN];
-    int  var_value[MAX_VAR_NUM];
+    float  var_value[MAX_VAR_NUM];
     u32  var_num;
 } VARLISTS;
 
-//ÒÔÏÂº¯ÊýÄ£ÄâPYTHONµÄLIST
+//ä»¥ä¸‹å‡½æ•°æ¨¡æ‹ŸPYTHONçš„LIST
 void list_init(LIST *lists);
 void list_append(LIST *lists, u32 a, u32 b);
 void expr_list_append(EXPR_LIST *lists, u32 a, u32 b);
@@ -47,41 +47,45 @@ void expr_list_pop(EXPR_LIST *lists, u32 a);
 void list_print(LIST *lists);
 
 
-//ÅÐ¶Ï×Ö·û´®AµÄindex´¦ÊÇ·ñÒÔ×Ö·û´®B¿ªÍ·
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„æ˜¯å¦ä»¥å­—ç¬¦ä¸²Bå¼€å¤´
 u8 str_eq(char *A, u32 index, char *B);
-//ÅÐ¶Ï×Ö·û´®AµÄindex´¦£¬ÊÇ·ñÓÐ¹Ø¼ü×Ö
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„ï¼Œæ˜¯å¦æœ‰å…³é”®å­—
 int key_in(char *A, u32 *index);
-//ÅÐ¶Ï×Ö·û´®AµÄindex´¦£¬ÊÇ·ñÓÐÔËËã·û
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„ï¼Œæ˜¯å¦æœ‰è¿ç®—ç¬¦
 int op_in(char *A, u32 *index);
-//ÅÐ¶Ï×Ö·û´®AµÄindex´¦£¬ÊÇ·ñÓÐÆäËû·ûºÅ
-int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists);
-//»ñµÃ±äÁ¿Ãû×Ö
-void get_var_name(char *code_str, VARLISTS *varLists, u32 *index);
-//¼ì²é´ÊÓïÊÇ·ñÊÇ±äÁ¿£¬ÈôÊÇÔò»ñµÃ±äÁ¿±àºÅ
-int var_name_in(char *code_str, VARLISTS *varLists, u32 *index);
-//´òÓ¡±äÁ¿ÐÅÏ¢
+//åˆ¤æ–­å­—ç¬¦ä¸²Açš„indexå¤„ï¼Œæ˜¯å¦æœ‰å…¶ä»–ç¬¦å·
+int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists, int line_num);
+//èŽ·å¾—å˜é‡åå­—
+void get_var_name(char *code_str, VARLISTS *varLists, u32 *index, int line_num);
+//æ£€æŸ¥è¯è¯­æ˜¯å¦æ˜¯å˜é‡ï¼Œè‹¥æ˜¯åˆ™èŽ·å¾—å˜é‡ç¼–å·
+int var_name_in(char *code_str, VARLISTS *varLists, u32 *index, int line_num);
+//æ‰“å°å˜é‡ä¿¡æ¯
 void pri_var(VARLISTS *varLists);
-//¼ÆËãÒ»ÐÐ´úÂëÖÐ£¬×îºóÒ»¸öÔªËØµÄindex
+//è®¡ç®—ä¸€è¡Œä»£ç ä¸­ï¼Œæœ€åŽä¸€ä¸ªå…ƒç´ çš„index
 u32 find_end_index(LIST *lists, u32 start);
 
 
-//·Ö´Ê
-void parser(char *code_str, LIST *lists, VARLISTS *varLists);
-//´òÓ¡×Ö·û´®indexºóµÄ15¸ö×Ö·û
+//åˆ†è¯
+int parser(char *code_str, LIST *lists, VARLISTS *varLists);
+//æ‰“å°å­—ç¬¦ä¸²indexåŽçš„15ä¸ªå­—ç¬¦
 void pr_n15_char(char *code_str, u32 index);
-//¼ÆËã¶ÔÓ¦·ûºÅµÄÎ»ÖÃ
-void index_match(char *code_str, LIST *lists);
-//±í´ïÊ½¼ÆËãÆ÷
-int expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end);
-//ÔËÐÐÆ÷
-void basic_run(LIST *lists, VARLISTS *varLists, int mem[]);
+
+//è®¡ç®—å¯¹åº”ç¬¦å·çš„ä½ç½®
+void index_match(LIST *lists);
+
+//è¡¨è¾¾å¼è®¡ç®—å™¨
+float expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end);
+//è¿è¡Œå™¨
+int basic_run(LIST *lists, VARLISTS *varLists, int mem[]);
 
 
-//´òÓ¡·Ö´ÊºóµÄ½á¹û
+//æ‰“å°åˆ†è¯åŽçš„ç»“æžœ
 void pri_parser(LIST *lists, VARLISTS *varLists, u32 index_start, u32 index_end);
 
 
-//Òì³£´¦Àí
-u32 err_handle(u8 err, char *code_str, int index);
-//Òì³£´¦Àí
+//å¼‚å¸¸å¤„ç†
+u32 err_handle(u8 err, int line_num);
+//å¼‚å¸¸å¤„ç†
 u32 expr_err(LIST *lists, VARLISTS *varLists, u8 err, int index);
+
+//
