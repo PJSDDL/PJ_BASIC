@@ -3,6 +3,8 @@
 #include <string.h>
 #include "BASIC.h"
 
+u8 error_code = 0;
+
 void list_init(LIST *lists)
 {
     lists->index = 0;
@@ -18,7 +20,7 @@ void list_append(LIST *lists, u32 a, u32 b)
 
     if (lists->index >= lists->MAX_LEN)
     {
-        err_handle(1, "list_append_out_mem",-1);
+        error_code = err_handle(1, -1);
     }
 }
 
@@ -31,7 +33,7 @@ void expr_list_append(EXPR_LIST *lists, u32 a, u32 b)
 
     if (lists->index >= lists->MAX_LEN)
     {
-        err_handle(1, "list_append_out_mem",-1);
+        error_code = err_handle(1, -1);
     }
 }
 
@@ -40,7 +42,7 @@ void expr_list_pop(EXPR_LIST *lists, u32 a)
 {
     if (lists->index == 0)
     {
-        err_handle(1, "list_pop_out_mem", -1);
+        error_code = err_handle(1, -1);
     }
 
     for (u32 i = a; i + 1 < lists->index; i++)
@@ -235,7 +237,7 @@ int op_in(char *A, u32 *index)
 
 //判断字符串A的index处，是否有其他符号
 //如果有，index自增以跳过关键词，并将这些符号存入code_list
-int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
+int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists, int line_num)
 {
     //enum MISC {TYPEVAR = 160, CONST_INT, STR};
     //以0~9开头的符号为数字
@@ -273,7 +275,7 @@ int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
 
         if ((num > 2147483647) | (num < -2147483648))
         {
-            err_handle(2, A, *index);
+            error_code = err_handle(2, line_num);
         }
 
         //float以u32形式存储
@@ -299,7 +301,7 @@ int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
     //变量替换为代号
     else
     {
-        int var_index = var_name_in(A, varLists, index);
+        int var_index = var_name_in(A, varLists, index, line_num);
         //printf("%d", var_index);
         if (var_index >= 0)
         {
@@ -314,7 +316,7 @@ int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists)
 }
 
 //获得变量名称，并分配变量编号
-void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
+void get_var_name(char *code_str, VARLISTS *varLists, u32 *index, int line_num)
 {
     do
     {
@@ -332,7 +334,7 @@ void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
         str_index++;
         if (str_index >= MAX_VAR_LEN)
         {
-            err_handle(3, code_str, *index);
+            error_code = err_handle(3, line_num);
         }
     }
     while((code_str[*index] != ' ') & (code_str[*index] != '\r')
@@ -343,12 +345,12 @@ void get_var_name(char *code_str, VARLISTS *varLists, u32 *index)
 
     if (varLists->var_num >= MAX_VAR_NUM)
     {
-        err_handle(4, code_str, *index);
+        error_code = err_handle(4, line_num);
     }
 }
 
 //检查词语是否是变量，若是则计算变量编号
-int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
+int var_name_in(char *code_str, VARLISTS *varLists, u32 *index, int line_num)
 {
     u8 str_index = 0;
     char str[MAX_VAR_LEN];
@@ -366,7 +368,7 @@ int var_name_in(char *code_str, VARLISTS *varLists, u32 *index)
 
         if (str_index >= MAX_VAR_LEN)
         {
-            err_handle(3, code_str, *index);
+            error_code = err_handle(3, line_num);
         }
     }
     str[str_index] = '\0';
@@ -442,11 +444,11 @@ void pr_n15_char(char *code_str, u32 index)
 }
 
 //分词器
-void parser(char *code_str, LIST *lists, VARLISTS *varLists)
+int parser(char *code_str, LIST *lists, VARLISTS *varLists)
 {
     u32 max_index = strlen(code_str);
     u32 index = 0;
-    u32 line_num = 0;
+    u32 line_num = 1;
 
     //初始化代码序列
     list_init(lists);
@@ -460,13 +462,17 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
         int key_in_num = key_in(code_str, &index);
         if (key_in_num >= 0)
         {
-            if (key_in_num == SPACE)  //跳过空格
+            if (key_in_num == SPACE)  //忽略空格
             {
                 continue;
             }
+            else if (key_in_num == NL) //计算行号
+            {
+                line_num++;
+            }
             else if (key_in_num == VAR)  //不是关键字则定义新变量
             {
-                get_var_name(code_str, varLists, &index);
+                get_var_name(code_str, varLists, &index, line_num + 1);
                 continue;
             }
 
@@ -484,7 +490,8 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
         }
 
         //识别其他类型标识符
-        int miscop_in_num = miscop_in(code_str, &index, lists, varLists);
+        int miscop_in_num =
+            miscop_in(code_str, &index, lists, varLists, line_num + 1);
         if (miscop_in_num > 0)
         {
             continue;
@@ -497,25 +504,32 @@ void parser(char *code_str, LIST *lists, VARLISTS *varLists)
             break;
         }
 
-        err_handle(6, code_str, index);
+        error_code = err_handle(6, line_num + 1);
+
+        return error_code;
 
     }
 }
 
 //计算对应符号的位置
 //if对应endif while对应endwh endwh对应while   call add对应 func add
-void index_match(char *code_str, LIST *lists)
+void index_match(LIST *lists)
 {
     u32 index = 0;
     u32 index_ = 0;
     u8 keycount = 0;
+    int line_num = 1;
 
     enum KEY keywords;
 
     while(1)
     {
-        keywords = IF;
-        if (lists->list[index][1] == keywords)
+        if (lists->list[index][1] == NL) //计算行号
+        {
+            line_num++;
+        }
+
+        if (lists->list[index][1] == IF)
         {
             //处理if的对应符号
             index_ = index;
@@ -533,7 +547,7 @@ void index_match(char *code_str, LIST *lists)
                 keywords = ENDIF;
                 if (index_ >= lists->index)
                 {
-                    err_handle(7, code_str, index);
+                    error_code = err_handle(7, line_num + 1);
                     return;
                 }
                 else if ((lists->list[index_][1] == keywords) & (keycount == 0))
@@ -570,7 +584,7 @@ void index_match(char *code_str, LIST *lists)
                 keywords = ENDWH;
                 if (index_ >= lists->index)
                 {
-                    err_handle(8, code_str, index);
+                    error_code = err_handle(8, line_num + 1);
                     return;
                 }
                 else if ((lists->list[index_][1] == keywords) & (keycount == 0))
@@ -607,7 +621,7 @@ void index_match(char *code_str, LIST *lists)
                 keywords = WHILE;
                 if (index_ >= lists->index)
                 {
-                    err_handle(9, code_str, index);
+                    error_code = err_handle(9, line_num + 1);
                     return;
                 }
                 else if ((lists->list[index_][1] == keywords) & (keycount == 0))
@@ -647,13 +661,13 @@ void index_match(char *code_str, LIST *lists)
                     }
                     else if (lists->list[i][1] != misc)
                     {
-                        err_handle(11, code_str, index);
+                        error_code = err_handle(11, line_num + 1);
                     }
                 }
 
                 if (i >= lists->index)
                 {
-                    err_handle(12, code_str, index);
+                    error_code = err_handle(12, line_num + 1);
                     break;
                 }
             }
@@ -671,7 +685,7 @@ void index_match(char *code_str, LIST *lists)
                 keywords = RET;
                 if (index_ >= lists->index)
                 {
-                    err_handle(13, code_str, index);
+                    error_code = err_handle(13, line_num + 1);
                     return;
                 }
                 else if ((lists->list[index_][1] == keywords))
@@ -944,7 +958,7 @@ void pri_parser(LIST *lists, VARLISTS *varLists, u32 index_start, u32 index_end)
         word_type = lists->list[ind][1];
 
         //printf("%u %u \n", word_name, word_type);
-        printf("index=%u  ", ind);
+        printf("%u  ", ind);
 
         //enum KEY {NL, DOT, PRI, IF, ENDIF, WHILE, ENDWH, SPACE, VAR};
         if (word_type == NL)
@@ -1074,7 +1088,7 @@ void pri_parser(LIST *lists, VARLISTS *varLists, u32 index_start, u32 index_end)
     }
 }
 
-void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
+int basic_run(LIST *lists, VARLISTS *varLists, int mem[])
 {
     enum KEY keywords;
     enum OPS ops;
@@ -1090,10 +1104,16 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
 
     while(1)
     {
+        if(error_code)
+        {
+            return -1;
+        }
+
         if (index >= lists->index)
         {
-            break;  //  程序执行完
+            return 1;  //  程序执行完
         }
+
         op = lists->list[index][1];
         num = lists->list[index][0];   //printf("index: %d\n", index);
 
@@ -1370,7 +1390,7 @@ void basic_run(LIST *lists, VARLISTS *varLists, int mem[])
     }
 }
 
-u32 err_handle(u8 err, char *code_str, int index)
+u32 err_handle(u8 err, int line_num)
 {
     printf("\n");
     switch(err)
@@ -1419,15 +1439,14 @@ u32 err_handle(u8 err, char *code_str, int index)
         break;
     }
 
-    printf("at ");
-    pr_n15_char(code_str, index-1);
+    printf("at line: %d\n", line_num);
 
-    return index;
+    return 1;
 }
 
 u32 expr_err(LIST *lists, VARLISTS *varLists, u8 err, int index)
 {
-    printf("expr err:\n");
+    printf("\nexpr err:\n");
     switch(err)
     {
     case 0:
@@ -1450,18 +1469,18 @@ u32 expr_err(LIST *lists, VARLISTS *varLists, u8 err, int index)
     printf("at:\n");
     u32 start, end;
 
-    if (index - 3 > 0)
+    if (index - 4 > 0)
     {
-        start = index - 3;
+        start = index - 4;
     }
     else
     {
         start = 0;
     }
 
-    if (index + 4 < lists->index)
+    if (index + 0 < lists->index)
     {
-        end = index + 4;
+        end = index + 0;
     }
     else
     {
@@ -1469,6 +1488,8 @@ u32 expr_err(LIST *lists, VARLISTS *varLists, u8 err, int index)
     }
 
     pri_parser(lists, varLists, start, end);
+
+    error_code = 1;
 
     return 1;
 }
