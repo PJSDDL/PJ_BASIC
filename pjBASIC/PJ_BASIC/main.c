@@ -3,7 +3,6 @@
 #include <string.h>
 #include "BASIC.h"
 
-
 char basic_prog[] = "\
 pri \"expr_test:\"\n\
 var i\n\
@@ -11,7 +10,7 @@ i = 9230\n\
 pri i + 1 \n\
 i = 2 < 1 \n\
 i = i * i \n\
-i = i + 2 * (1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) )\n\
+i = i + (2 * 1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) )\n\
 pri i\n\
 pri \"expr_test_end:\"\n\
 pri \"if_test:\"\n\
@@ -99,7 +98,7 @@ endwh \n\
 char basic_prog[] = "\
 var i\n\
 i = 1\n\
-i = i + 2 * ( 1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) )\n\
+i = i + 2 * ( 1 + ( 3 + 4 ) * 5 + 1 * 1 - 2 + ( 4 - 2 ) * ( 10 - 9 ) ) \n\
 call 1\n\
 pri \"func_test\n\"  \n\
 pri \"var\" 0 \": i = \" i \n\
@@ -130,6 +129,27 @@ pri i  \n\
 LIST lists;
 VARLISTS varLists;
 int mem[MEM_SIZE];
+extern u8 error_code;
+
+int basic_interpreter(LIST lists, VARLISTS varLists)
+{
+    parser(basic_prog, &lists, &varLists);
+    if(error_code)
+    {
+        return -1;
+    }
+
+    index_match(&lists);
+    if(error_code)
+    {
+        return -1;
+    }
+    //pri_var(&varLists);
+    //list_print(&lists);
+    //pri_parser(&lists, &varLists, 0, lists.index);
+    printf("\n-----BASIC RUN-----\n");
+    return basic_run(&lists, &varLists, mem);
+}
 
 int main()
 {
@@ -156,20 +176,9 @@ int main()
         b++;
     }
 
-    //分词测试
-    u32 index = 0;
-    printf("%d\n", key_in("if i > 10", &index));
-    index = 12;
-    printf("%d\n", key_in("if i > 10 \n endif", &index));
-
     printf("code_len: %d\n", strlen(basic_prog));
-    parser(basic_prog, &lists, &varLists);
-    index_match(basic_prog, &lists);
-    //pri_var(&varLists);
-    //list_print(&lists);
-    //pri_parser(&lists, &varLists, 0, lists.index);
-    printf("\n-----BASIC RUN-----\n");
-    basic_run(&lists, &varLists, mem);
+
+    basic_interpreter(lists, varLists);
 
     /*
     for (u32 *i = &lists_test; ; i++)
