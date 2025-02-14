@@ -54,11 +54,11 @@ int key_in(char *A, u32 *index);
 //判断字符串A的index处，是否有运算符
 int op_in(char *A, u32 *index);
 //判断字符串A的index处，是否有其他符号
-int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists);
+int miscop_in(char *A, u32 *index, LIST *lists, VARLISTS *varLists, int line_num);
 //获得变量名字
-void get_var_name(char *code_str, VARLISTS *varLists, u32 *index);
+void get_var_name(char *code_str, VARLISTS *varLists, u32 *index, int line_num);
 //检查词语是否是变量，若是则获得变量编号
-int var_name_in(char *code_str, VARLISTS *varLists, u32 *index);
+int var_name_in(char *code_str, VARLISTS *varLists, u32 *index, int line_num);
 //打印变量信息
 void pri_var(VARLISTS *varLists);
 //计算一行代码中，最后一个元素的index
@@ -66,15 +66,17 @@ u32 find_end_index(LIST *lists, u32 start);
 
 
 //分词
-void parser(char *code_str, LIST *lists, VARLISTS *varLists);
+int parser(char *code_str, LIST *lists, VARLISTS *varLists);
 //打印字符串index后的15个字符
 void pr_n15_char(char *code_str, u32 index);
+
 //计算对应符号的位置
-void index_match(char *code_str, LIST *lists);
+void index_match(LIST *lists);
+
 //表达式计算器
 float expr(VARLISTS *varLists, LIST *lists, u32 expr_start, u32 expr_end);
 //运行器
-void basic_run(LIST *lists, VARLISTS *varLists, int mem[]);
+int basic_run(LIST *lists, VARLISTS *varLists, int mem[]);
 
 
 //打印分词后的结果
@@ -82,6 +84,8 @@ void pri_parser(LIST *lists, VARLISTS *varLists, u32 index_start, u32 index_end)
 
 
 //异常处理
-u32 err_handle(u8 err, char *code_str, int index);
+u32 err_handle(u8 err, int line_num);
 //异常处理
 u32 expr_err(LIST *lists, VARLISTS *varLists, u8 err, int index);
+
+//
